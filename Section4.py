@@ -385,36 +385,36 @@ def section4():
           row = ['4.11 Restrict access to  $CATALINA_HOME/conf/logging.properties', 'The permission of  $CATALINA_HOME/conf/logging.properties is incorrect', 'No', ' chmod 600 $CATALINA_HOME/conf/logging.properties']
           csv_output(row)
   restrict_access_to_tomcatloggingproperties()
-      def restrict_access_to_tomcatserver():
-      print("===Section 4.12===")
-      EXPECTED_USER = "tomcat_admin"
-      EXPECTED_GROUP = "tomcat"
+  def restrict_access_to_tomcatserver():
+    print("===Section 4.12===")
+    EXPECTED_USER = "tomcat_admin"
+    EXPECTED_GROUP = "tomcat"
 
-      server_path = os.path.join(tomcat_dir, 'conf', 'server.xml')
-      # Expected permissions for group and world
-      EXPECTED_MODE = 0o600  # rw-------
-      # Get the actual user and group of the directory
-      try:
-          stat_info = os.stat(server_path)
-          actual_user = pwd.getpwuid(stat_info.st_uid).pw_name
-          actual_group = grp.getgrgid(stat_info.st_gid).gr_name
-          actual_mode = stat_info.st_mode
-      except OSError:
-          actual_user = None
-          actual_group = None
-          actual_mode = None
-      
-      # Check if the actual user and group match the expected ones
-      if actual_user != EXPECTED_USER and actual_group != EXPECTED_GROUP:
-          row = ['4.12 Restrict access to  $CATALINA_HOME/conf/ server.xml', 'The ownership of  $CATALINA_HOME/conf/ server.xml is incorrect', 'No', 'chown tomcat_admin.tomcat  $CATALINA_HOME/conf/ server.xml']
-          csv_output(row)
+    server_path = os.path.join(tomcat_dir, 'conf', 'server.xml')
+    # Expected permissions for group and world
+    EXPECTED_MODE = 0o600  # rw-------
+    # Get the actual user and group of the directory
+    try:
+        stat_info = os.stat(server_path)
+        actual_user = pwd.getpwuid(stat_info.st_uid).pw_name
+        actual_group = grp.getgrgid(stat_info.st_gid).gr_name
+        actual_mode = stat_info.st_mode
+    except OSError:
+        actual_user = None
+        actual_group = None
+        actual_mode = None
+    
+    # Check if the actual user and group match the expected ones
+    if actual_user != EXPECTED_USER and actual_group != EXPECTED_GROUP:
+        row = ['4.12 Restrict access to  $CATALINA_HOME/conf/ server.xml', 'The ownership of  $CATALINA_HOME/conf/ server.xml is incorrect', 'No', 'chown tomcat_admin.tomcat  $CATALINA_HOME/conf/ server.xml']
+        csv_output(row)
 
-      if actual_mode is None:
-        print(f"Could not check file permissions for {server_path}.")
-      else:
-        if actual_mode != EXPECTED_MODE:
-          row = ['4.12 Restrict access to  $CATALINA_HOME/conf/server.xml', 'The permission of  $CATALINA_HOME/conf/server.xml is incorrect', 'No', ' chmod 600 $CATALINA_HOME/conf/server.xml']
-          csv_output(row)
+    if actual_mode is None:
+      print(f"Could not check file permissions for {server_path}.")
+    else:
+      if actual_mode != EXPECTED_MODE:
+        row = ['4.12 Restrict access to  $CATALINA_HOME/conf/server.xml', 'The permission of  $CATALINA_HOME/conf/server.xml is incorrect', 'No', ' chmod 600 $CATALINA_HOME/conf/server.xml']
+        csv_output(row)
   restrict_access_to_tomcatserver()
   def restrict_access_to_tomcatusers():
       print("===Section 4.13===")
