@@ -1710,6 +1710,7 @@ if __name__ == '__main__':
   url = sys.argv[1]
   basereq = requests.get(url, verify=False,allow_redirects=False)
   print(Fore.BLUE+banner)
+  print
   check_nginx_installed()
   installed_from_source()
   check_url_directory_listing(url)
@@ -1719,7 +1720,6 @@ if __name__ == '__main__':
   directories_perms()
   restricted_perms()
   secure_pid()
-  block_ips()
   core_dump()
   network_conn()
   curl_host(url)
@@ -1755,3 +1755,4 @@ if __name__ == '__main__':
   http_headers()
   check_open_ports(url)
   check_session_fixation(url)
+  block_ips()
