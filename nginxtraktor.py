@@ -1729,7 +1729,7 @@ if __name__ == '__main__':
 
   url = sys.argv[1]
   basereq = requests.get(url, verify=False,allow_redirects=False)
-  print(Fore.BLUE+banner)
+  print(Fore.WHITE+banner)
   print(f"{Fore.WHITE} Section 1 : Initial Setup")
   check_nginx_installed()
   installed_from_source()
