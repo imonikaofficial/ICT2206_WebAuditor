@@ -57,8 +57,7 @@ def run_selected_function():
                 elif choice == 9:
                     section9()
                 elif choice == 10:
-                    print('section10')
-                     section10()
+                    section10()
             else:
                 print(f"Invalid choice {choice}. Please try again.")
         except ValueError:
