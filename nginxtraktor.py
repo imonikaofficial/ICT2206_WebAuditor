@@ -958,7 +958,7 @@ def trust_chain_key():
     cmd = subprocess.check_output(log_cmd, shell=True).decode().strip()  
     pattern = r"^\s*([^#].*ssl_certificate(_key)?;)"
     matches = re.findall(pattern, cmd)
-    cert_addr = input('Enter the file location of ssl_certificate directive : ')     
+    cert_addr = input('Enter the file location of ssl_certificate directive (/etc/nginx/cert.pem) : ')     
     cert = f" cat  {cert_addr}"
     cert_cmd = subprocess.check_output(cert, shell=True).decode().strip()  
     pattern1 = r"(?s)-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----"
