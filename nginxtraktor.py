@@ -1365,7 +1365,7 @@ proxy_ssl_ciphers EECDH:EDH:!NULL:!SSLv2:!RC4:!aNULL:!3DES:!IDEA;
  else:
         print("[-] Cipher string not found in nginx config file.")
 def approved_HTTP():
- print("[+] Check for unapproced HTTP methods ")
+ print("[+] Check for unapproved HTTP methods ")
  open_methods = []
  for method in ['OPTIONS', 'TRACE', 'CONNECT','DELETE']:
     response = requests.request(method, url,allow_redirects=False)
@@ -1685,7 +1685,23 @@ def check_session_fixation(url):
         print(attack_response.status_code)
     else:
         print('[+] Server only accepts newly generated SIDs - not vulnerable to session fixation attack')
+def check_cors_vuln(url):
+    print("[+] Check for CORS vulnerabiltites" )
+    # Send a request with an origin header to test CORS configuration
+    headers = {'Origin': 'https://malicious-site.com'}
+    response = requests.get(url, headers=headers,allow_redirects=False)
 
+    # Check for Access-Control-Allow-Origin header
+    if 'access-control-allow-origin' not in response.headers:
+        print('[+] Missing Access-Control-Allow-Origin header!')
+    else:
+        allowed_origin = response.headers['access-control-allow-origin']
+        if allowed_origin == '*':
+            print('[+] CORS misconfiguration: Allow-Origin set to wildcard (*)')
+        elif 'https://malicious-site.com' not in allowed_origin:
+            print(f'{Fore.RED}[-] CORS misconfiguration: Allow-Origin does not include malicious site')
+        else:
+            print(f'{Fore.RED}[-] CORS is configured correctly.')
 
 if __name__ == '__main__':
   banner = '''
@@ -1763,3 +1779,4 @@ if __name__ == '__main__':
   check_session_fixation(url)
   block_ips()
   crlf_injections(url)
+  check_cors_vuln(url)
