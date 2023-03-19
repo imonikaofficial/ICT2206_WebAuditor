@@ -156,7 +156,7 @@ def account_security():
              if get_grp:
                 print(f"[+] The nginx dedicated user {user} is not part of any unexpected groups")
              elif not get_grp:
-                print(f"{Fore.RED}[-] The nginx dedicated user {user} is part of anunexpected groups")
+                print(f"{Fore.RED}[-] The nginx dedicated user {user} is part of any unexpected groups")
              else:
                 print(f'{Fore.RED}[-]No nginx group found')
                 print('[-] Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
@@ -173,7 +173,7 @@ def account_security():
              if get_grp:
                 print(f"[+] The nginx dedicated user {user} is not part of any unexpected groups")
              elif not get_grp:
-                print(f"{Fore.RED}[-] The nginx dedicated user {user} is part of an unexpected groups")
+                print(f"{Fore.RED}[-] The nginx dedicated user {user} is part of any unexpected groups")
              else:
                 print(f'{Fore.RED}[-] No nginx group found')
                 print('[-] Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
