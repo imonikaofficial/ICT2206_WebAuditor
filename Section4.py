@@ -105,7 +105,7 @@ def section4():
         if actual_mode != EXPECTED_MODE:
           row = ['4.1 Restrict access to $CATALINA_BASE', 'The permission of $CATALINA_BASE is incorrect', 'No', 'chmod g-w,o-rwx $CATALINA_BASE']
           csv_output(row)
-  #restrict_access_to_tomcatbase()
+  restrict_access_to_tomcatbase()
   def restrict_access_to_tomcatconf():
       print("===Section 4.3===")
       EXPECTED_USER = "tomcat_admin"

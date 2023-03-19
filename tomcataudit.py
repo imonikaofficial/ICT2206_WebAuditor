@@ -28,7 +28,7 @@ def run_all_sections():
     section7()
     section8()
     section9()
-   section10()
+    section10()
 
 def run_selected_function():
     section_list = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
