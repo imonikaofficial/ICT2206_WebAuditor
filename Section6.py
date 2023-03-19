@@ -9,8 +9,8 @@ def section6():
     control_check = '6.1 Setup Client-cert Authentication'
     header_row = [control_check, 'Current Setting', 'Audit Finding', 'Remediation']
     rows = [header_row]
-
-    server_xml_path = os.path.join(os.environ.get("CATALINA_BASE"), "conf", "server.xml")
+    tomcat_dir = os.getenv('CATALINA_HOME')
+    server_xml_path = os.path.join(tomcat_dir, "conf", "server.xml")
 
     with open(server_xml_path, "r") as f:
         for line in f:
@@ -27,7 +27,7 @@ def section6():
                 print("certificateVerification is not set to required.")
 
     print('Ensure SSLEnabled is set to True for Sensitive Connectors ')
-    server_xml_path = os.path.join(os.environ.get("CATALINA_BASE"), "conf", "server.xml")
+    server_xml_path = os.path.join(tomcat_dir, "conf", "server.xml")
     tree = ET.parse(server_xml_path)
     root = tree.getroot()
 
@@ -43,7 +43,7 @@ def section6():
             print(f"Connector with port {connector.get('port')} does not have SSLEnabled set to true.")
 
     print('Ensure scheme is set accurately')
-    server_xml_path = os.path.join(os.environ.get("CATALINA_BASE"), "conf", "server.xml")
+    server_xml_path = os.path.join(os.getenv('CATALINA_HOME'), "conf", "server.xml")
 
     tree = ET.parse(server_xml_path)
     root = tree.getroot()
@@ -61,7 +61,7 @@ def section6():
 
     print('Ensure secure is set to true only for SSL-enabled Connectors')
     server_xml_path = os.path.join(os.environ.get("CATALINA_BASE"), "conf", "server.xml")
-    with open(os.path.join(os.environ['CATALINA_BASE'], 'conf', 'server.xml'), 'r') as f:
+    with open(os.path.join(tomcat_dir, 'conf', 'server.xml'), 'r') as f:
         lines = f.readlines()
         for i, line in enumerate(lines):
             if '<Connector' in line and 'port="' + connector in line:
@@ -76,7 +76,7 @@ def section6():
                             print('Connector ' + connector + ' should have secure attribute set to false')
 
     print('Ensure "sslProtocol" is Configured Correctly for Secure Connectors')
-    catalina_base = os.getenv('CATALINA_BASE/conf/')
+    catalina_base = os.getenv('CATALINA_HOME/conf/')
     for dirpath, dirnames, filenames in os.walk(os.path.join(catalina_base, "conf")):
         for filename in filenames:
             if filename == "server.xml":

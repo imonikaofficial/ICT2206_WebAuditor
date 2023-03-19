@@ -9,7 +9,7 @@ def section8():
     control_check = '8.1 Restrict runtime access to sensitive packages'
     header_row = [control_check, 'Current Setting', 'Audit Finding', 'Remediation']
     rows = [header_row]
-    catalina_properties = os.getenv('CATALINA_BASE/conf/catalina.properties')
+    catalina_properties = os.getenv('CATALINA_HOME/conf/catalina.properties')
     with open(catalina_properties , 'r') as f:
         for line in f:
             if line.startswith('package.access'):

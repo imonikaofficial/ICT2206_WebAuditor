@@ -9,8 +9,8 @@ def section7():
     control_check = '7.1  Application specific logging'
     header_row = [control_check, 'Current Setting', 'Audit Finding', 'Remediation']
     rows = [header_row]
-
-    webapps_path = os.path.join(os.environ.get("CATALINA_HOME"), "webapps")
+    tomcat_dir = os.getenv('CATALINA_HOME')
+    webapps_path = os.path.join(tomcat_dir, "webapps")
     for dir_name in os.listdir(webapps_path):
         app_path = os.path.join(webapps_path, dir_name)
         if os.path.isdir(app_path):
@@ -27,9 +27,9 @@ def section7():
                 print(f"logging.properties file not found in {dir_name}.")
 
     print('7.2 Ensure Specification on file handler in logging.properties files')
-    app_names = os.listdir(os.path.join(os.environ.get("CATALINA_BASE"), "webapps"))
+    app_names = os.listdir(os.path.join(tomcat_dir, "webapps"))
     for app_name in app_names:
-        logging_props_path = os.path.join(os.environ.get("CATALINA_BASE"), "webapps", app_name, "WEB-INF", "classes", "logging.properties")
+        logging_props_path = os.path.join(tomcat_dir, "webapps", app_name, "WEB-INF", "classes", "logging.properties")
 
     if os.path.exists(logging_props_path):
         cmd = f"grep handlers {logging_props_path}"
@@ -41,7 +41,7 @@ def section7():
             print(f"No handlers found for {app_name}")
 
     print('7.3 Ensuring className is set correctly in context.xml')
-    webapps_path = os.path.join(os.environ.get("CATALINA_BASE"), "webapps")
+    webapps_path = os.path.join(os.getenv('CATALINA_HOME'), "webapps")
 
     for app_name in os.listdir(webapps_path):
         context_path = os.path.join(webapps_path, app_name, "META-INF", "context.xml")
@@ -52,7 +52,7 @@ def section7():
             print(f"No context.xml file found for {app_name}.")
 
     print('Ensure directory in context.xml is a secure location')
-    webapps_dir = os.path.join(os.environ.get("CATALINA_BASE"), "webapps")
+    webapps_dir = os.path.join(tomcat_dir, "webapps")
     tomcat_admin = "tomcat_admin"
     tomcat_group = "tomcat"
 
@@ -116,7 +116,7 @@ def section7():
             print(f"Context.xml file for app '{app_name}' does not exist")
 
     print('Ensuring pattern in context.xml is correct')
-    webapps_path = os.path.join(os.environ.get("CATALINA_BASE"), "webapps")
+    webapps_path = os.path.join(tomcat_dir, "webapps")
 
     for app_name in os.listdir(webapps_path):
         context_xml_path = os.path.join(webapps_path, app_name, "META-INF", "context.xml")
