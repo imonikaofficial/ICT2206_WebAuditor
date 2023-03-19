@@ -24,11 +24,11 @@ def run_all_sections():
     section3()
     section4()
     section5()
-    section6()
-    section7()
-    section8()
-    section9()
-    section10()
+#    section6()
+#    section7()
+#    section8()
+#    section9()
+#   section10()
 
 def run_selected_function():
     section_list = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
@@ -48,16 +48,16 @@ def run_selected_function():
                     section4()
                 elif choice == 5:
                     section5()
-                elif choice == 6:
-                    section6()
-                elif choice == 7:
-                    section7()
-                elif choice == 8:
-                    section8()
-                elif choice == 9:
-                    section9()
-                elif choice == 10:
-                    print('section10')
+#                elif choice == 6:
+#                    section6()
+#                elif choice == 7:
+#                    section7()
+#                elif choice == 8:
+#                    section8()
+#                elif choice == 9:
+#                    section9()
+#                elif choice == 10:
+#                    print('section10')
                     # section10()
             else:
                 print(f"Invalid choice {choice}. Please try again.")
