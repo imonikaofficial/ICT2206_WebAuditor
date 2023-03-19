@@ -1,8 +1,10 @@
 import csv
 import os
 import xml.etree.ElementTree as ET
+from csvoutput import csv_output
 
-def section6(csvFile):
+def section6():
+    print("====Start of Section 6====\n")
     print('Setup Client-cert Authentication\n')
     control_check = '6.1 Setup Client-cert Authentication'
     header_row = [control_check, 'Current Setting', 'Audit Finding', 'Remediation']
@@ -21,9 +23,7 @@ def section6(csvFile):
                 remediation = 'In the Connector element, set the clientAuth parameter to true and the certificateVerification to required'
                 row = [control_check, current_setting, audit_finding, remediation]
                 rows.append(row)
-                with open(csvFile, 'w', newline='') as f:
-                    writer = csv.writer(f)
-                    writer.writerows(rows)
+                csv_output(rows)
                 print("certificateVerification is not set to required.")
 
     print('Ensure SSLEnabled is set to True for Sensitive Connectors ')
@@ -39,9 +39,7 @@ def section6(csvFile):
             remediation = 'In server.xml, set the SSLEnabled attribute to true'
             row = [control_check, current_setting, audit_finding, remediation]
             rows.append(row)
-            with open(csvFile, 'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerows(rows)
+            csv_output(rows)
             print(f"Connector with port {connector.get('port')} does not have SSLEnabled set to true.")
 
     print('Ensure scheme is set accurately')
@@ -58,9 +56,7 @@ def section6(csvFile):
             remediation = 'In server.xml, set the Connector’s scheme attribute to http for Connectors operating over HTTP'
             row = [control_check, current_setting, audit_finding, remediation]
             rows.append(row)
-            with open(csvFile, 'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerows(rows)
+            csv_output(rows)
             print('The scheme attribute is not set to https in a Connector element.')
 
     print('Ensure secure is set to true only for SSL-enabled Connectors')
@@ -100,8 +96,7 @@ def section6(csvFile):
                             remediation = 'In server.xml, set the sslProtocol attribute to TLSv1.2+TLSv1.3 for Connectors having SSLEnabled set to true.'
                             row = [control_check, current_setting, audit_finding, remediation]
                             rows.append(row)
-                            with open(csvFile, 'w', newline='') as f:
-                                writer = csv.writer(f)
-                                writer.writerows(rows)
+                            csv_output(rows)
                             print(
                                 f"WARNING: sslProtocol for {connector.get('port')} is set to {ssl_protocol} instead of TLSv1.2, TLSv1.3, or TLSv1.2+TLSv1.3")
+    print("====End of Section 6====")

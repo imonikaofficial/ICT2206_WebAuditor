@@ -1,8 +1,10 @@
 import csv
 import os
+from csvoutput import csv_output
 
 
-def section7(csvFile):
+def section7():
+    print('====Start of Section 7====\n')
     print('Ensuring application specific logging\n')
     control_check = '7.1  Application specific logging'
     header_row = [control_check, 'Current Setting', 'Audit Finding', 'Remediation']
@@ -21,9 +23,7 @@ def section7(csvFile):
                 remediation = 'Create logging.properites file and place into  WEB-INF/classes directory'
                 row = [control_check, current_setting, audit_finding, remediation]
                 rows.append(row)
-                with open(csvFile, 'w', newline='') as f:
-                    writer = csv.writer(f)
-                    writer.writerows(rows)
+                csv_output(rows)
                 print(f"logging.properties file not found in {dir_name}.")
 
     print('7.2 Ensure Specification on file handler in logging.properties files')
@@ -84,9 +84,7 @@ def section7(csvFile):
                         remediation = f"Set the location '{directory_path}' to be owned by tomcat_admin:tomcat"
                         row = [control_check, current_setting, audit_finding, remediation]
                         rows.append(row)
-                        with open(csvFile, 'w', newline='') as f:
-                            writer = csv.writer(f)
-                            writer.writerows(rows)
+                        csv_output(rows)
                         print(f"Directory '{directory_path}' is not owned by 'tomcat_admin'")
 
                     group = grp.getgrgid(directory_stat.st_gid).gr_name
@@ -98,9 +96,7 @@ def section7(csvFile):
                         remediation = f"Set the location '{directory_path}' to be owned by tomcat_admin:tomcat"
                         row = [control_check, current_setting, audit_finding, remediation]
                         rows.append(row)
-                        with open(csvFile, 'w', newline='') as f:
-                            writer = csv.writer(f)
-                            writer.writerows(rows)
+                        csv_output(rows)
                         print(f"Directory '{directory_path}' is not owned by group 'tomcat'")
 
                     permissions = oct(directory_stat.st_mode & 0o777)
@@ -112,9 +108,7 @@ def section7(csvFile):
                         remediation = f"Set the location '{directory_path}' to have the correct permissions (o-rwx)"
                         row = [control_check, current_setting, audit_finding, remediation]
                         rows.append(row)
-                        with open(csvFile, 'w', newline='') as f:
-                            writer = csv.writer(f)
-                            writer.writerows(rows)
+                        csv_output(rows)
                         print(f"Directory '{directory_path}' does not have the correct permissions (o-rwx)")
                 else:
                     print(f"Directory '{directory_path}' does not exist")
@@ -140,9 +134,9 @@ def section7(csvFile):
                     remediation = 'Add the following statement into the location ' + app_name + ' :<Valve className="org.apache.catalina.valves.AccessLogValve" directory="$CATALINA_HOME/logs/" prefix="access_log" fileDateFormat="yyyy-MMdd.HH" suffix=".log" pattern="%h %t %H cookie:%{SESSIONID}c request:%{SESSIONID}r %m %U %s %q %r"/>'
                     row = [control_check, current_setting, audit_finding, remediation]
                     rows.append(row)
-                    with open(csvFile, 'w', newline='') as f:
-                        writer = csv.writer(f)
-                        writer.writerows(rows)
+                    csv_output(rows)
                     print(f"Application {app_name}: pattern setting does not exist in context.xml")
         else:
             print(f"Application {app_name}: context.xml does not exist")
+
+    print('====End of Section 7====')

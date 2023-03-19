@@ -1,13 +1,14 @@
 import csv
 import os
 import xml.etree.ElementTree as ET
+from csvoutput import csv_output
 
-def section9(csvFile):
+def section9():
+    print('====Start of Section 9====\n')
     print('Ensuring Tomcat starts with Security Manager\n')
     control_check = '9.1 Starting Tomcat with Security Manager'
     header_row = [control_check, 'Current Setting', 'Audit Finding', 'Remediation']
     rows = [header_row]
-    catalina_home = os.getenv('CATALINA_HOME')
 
 
 
@@ -25,9 +26,7 @@ def section9(csvFile):
                 remediation = 'In the $CATALINA_HOME/conf/server.xml file, change autoDeploy to false'
                 row = [control_check, current_setting, audit_finding, remediation]
                 rows.append(row)
-                with open(csvFile, 'w', newline='') as f:
-                    writer = csv.writer(f)
-                    writer.writerows(rows)
+                csv_output(rows)
                 print("autoDeploy is not set to false in server.xml")
 
     print('Ensuring deploy on startup of applications is disabled')
@@ -45,8 +44,7 @@ def section9(csvFile):
                     remediation = 'In the $CATALINA_HOME/conf/server.xml file, change deployOnStartup to false'
                     row = [control_check, current_setting, audit_finding, remediation]
                     rows.append(row)
-                    with open(csvFile, 'w', newline='') as f:
-                        writer = csv.writer(f)
-                        writer.writerows(rows)
+                    csv_output(rows)
                     print("deployOnStartup is not set to false in server.xml")
+    print('====End of Section 9====')
 

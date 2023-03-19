@@ -1,8 +1,10 @@
 import csv
 import os
+from csvoutput import csv_output
 
 
-def section8(csvFile):
+def section8():
+    print('====Start of section 8====')
     print('Restrict runtime access to sensitive packages\n')
     control_check = '8.1 Restrict runtime access to sensitive packages'
     header_row = [control_check, 'Current Setting', 'Audit Finding', 'Remediation']
@@ -20,6 +22,5 @@ def section8(csvFile):
 
     row = [control_check, current_setting, audit_finding, remediation]
     rows.append(row)
-    with open(csvFile, 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerows(rows)
+    csv_output(rows)
+    print('====End of section 8====')

@@ -9,15 +9,13 @@ from Section8 import *
 from Section9 import *
 from Section10 import *
 
-csvFile = "C:\Users\Gaindy\Desktop\2206\output.csv"
 banner = '''
 ████████╗ ██████╗ ███╗   ███╗ ██████╗ █████╗ ████████╗ █████╗ ██╗   ██╗██████╗ ██╗████████╗
 ╚══██╔══╝██╔═══██╗████╗ ████║██╔════╝██╔══██╗╚══██╔══╝██╔══██╗██║   ██║██╔══██╗██║╚══██╔══╝
    ██║   ██║   ██║██╔████╔██║██║     ███████║   ██║   ███████║██║   ██║██║  ██║██║   ██║   
    ██║   ██║   ██║██║╚██╔╝██║██║     ██╔══██║   ██║   ██╔══██║██║   ██║██║  ██║██║   ██║   
    ██║   ╚██████╔╝██║ ╚═╝ ██║╚██████╗██║  ██║   ██║   ██║  ██║╚██████╔╝██████╔╝██║   ██║   
-   ╚═╝    ╚═════╝ ╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝   ╚═╝    
-         A common vulnerability scanner for misconfigurations in Apache Tomcat Web server
+   ╚═╝    ╚═════╝ ╚═╝     ╚═╝ ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝   ╚═╝                                                                               
 '''
 
 def run_all_sections():
@@ -26,38 +24,45 @@ def run_all_sections():
     section3()
     section4()
     section5()
-    section6(csvFile)
-    section7(csvFile)
-    section8(csvFile)
-    section9(csvFile)
-    section10(csvFile)
+    section6()
+    section7()
+    section8()
+    section9()
+    section10()
 
 def run_selected_function():
-    choice = input("Enter section number to audit (1-10): ")
-    if choice == "1":
-        section1()
-    elif choice == "2":
-        section2()
-    elif choice == "3":
-        section3()
-    elif choice == "4":
-        section4()
-    elif choice == "4":
-        section4()
-    elif choice == "5":
-        section5()
-    elif choice == "6":
-        section6(csvFile)
-    elif choice == "7":
-        section7(csvFile)
-    elif choice == "8":
-        section8(csvFile)
-    elif choice == "9":
-        section9(csvFile)
-    elif choice == "10":
-        section10(csvFile)
-    else:
-        print("Invalid choice. Please try again.")
+    section_list = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+    choice = input("Enter section number to audit eg, (1 2 3): ")
+    choices = choice.split()
+    for choice in choices:
+        try:
+            choice = int(choice)
+            if choice in section_list:
+                if choice == 1:
+                    section1()
+                elif choice == 2:
+                    section2()
+                elif choice == 3:
+                    section3()
+                elif choice == 4:
+                    section4()
+                elif choice == 5:
+                    section5()
+                elif choice == 6:
+                    section6()
+                elif choice == 7:
+                    section7()
+                elif choice == 8:
+                    section8()
+                elif choice == 9:
+                    section9()
+                elif choice == 10:
+                    print('section10')
+                    # section10()
+            else:
+                print(f"Invalid choice {choice}. Please try again.")
+        except ValueError:
+            print(f"Invalid choice {choice}. Please enter a valid integer.")
 print(banner)
 print("Select an option:")
 print("1. Run all sections")
@@ -68,7 +73,7 @@ choice = input("Enter option number: ")
 if choice == "1":
     run_all_sections()
 elif choice == "2":
-    run_selected_section()
+    run_selected_function()
 else:
     print("Invalid choice. Please try again.")
 
