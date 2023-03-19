@@ -119,7 +119,7 @@ def audit_http_dav_module():
     if output:
         print(f'{Fore.RED}[-] http_dav_module is installed')
     else:
-        print(f"{Fore.GREEN} http_dav_module is not installed')
+        print(f'{Fore.GREEN} http_dav_module is not installed')
 
 # Audit for gzip modules
 def audit_gzip_modules():
@@ -162,7 +162,7 @@ def account_security():
                 print(f"{Fore.RED}[-] The nginx dedicated user {user} is part of any unexpected groups")
              else:
                 print(f'{Fore.RED}[-]No nginx group found')
-                print(f"{Fore.GREEN} Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
+                print('Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
           else:
             print(f"{Fore.RED}[-] A dedicated nginx user called {user} is privileged")        
        elif user == nginx :
@@ -179,14 +179,14 @@ def account_security():
                 print(f"{Fore.RED}[-] The nginx dedicated user {user} is part of any unexpected groups")
              else:
                 print(f'{Fore.RED}[-] No nginx group found')
-                print(f'{Fore.WHITE}[+] Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
+                print('[+] Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
           else:
             print(f"{Fore.RED}[-] A dedicated nginx user called {user} is  privileged")                   
        else:
           print(f"{Fore.RED}[-] {user} is not a dedicated user")      
     elif not get_acc:
        print(f'{Fore.RED}[-] A dedicated nginx user does not exist')
-       print(f'{Fore.WHITE}[+] Make sure that a dedicated user directive exist in the {} file\n'.format(nginx_configfile))
+       print('[+] Make sure that a dedicated user directive exist in the {} file\n'.format(nginx_configfile))
        remediate = input("Do you want to fix this issue? (y/n) ")
        
        if remediate.lower() == "y":
@@ -266,7 +266,7 @@ def directories_perms():
         grep_command = f" stat {configDir} "
         os.system(grep_command)           
 def restricted_perms():
-    print(f'{Fore.WHITE}[+] Ensure access to NGINX directories and files is restricted")
+    print(f"{Fore.WHITE}[+] Ensure access to NGINX directories and files is restricted")
     configDir = r'/etc/nginx'
     if not os.path.isdir(configDir):
         configDir = input('Enter the location of the config folder:')
@@ -288,7 +288,7 @@ def restricted_perms():
         if remediate.lower() == "y":   
           grep_command = f" sudo chmod go-w {configDir}  "
           os.system(grep_command)
-          print(f'{Fore.GREEN}[+]Permissions are set with the ability to read as other by default on the configuration directory {configDir}: -rw-r--r-- ")     
+          print(f"{Fore.GREEN}[+]Permissions are set with the ability to read as other by default on the configuration directory {configDir}: -rw-r--r-- ")     
         elif remediate.lower() == "n":
           print(f"{Fore.RED}[-] Permissions are not set with the ability to read as other by default on the configuration directory {configDir}: -rw-r--r-- ")     
       elif not dir_perm_int <= 755:
@@ -455,7 +455,7 @@ def block_ips():
             for ip in ip_set:
                 f.write('    {0} 1;\n'.format(ip))
             f.write('}\n')
-            print(f"{Fore.GREEN}[+] Blacklisted the IP addresses successfully at blockips.conf file and add the file name on the nginx.conf as 'include {your_blockips.conf_path}' under http and add the following in /etc/nginx/sites-enabled/* if you have enabled vhosts the following: \n if ($blocked_ips) \n{\nreturn 403;\n}  under location /")
+            print("[+] Blacklisted the IP addresses successfully at blockips.conf file and add the file name on the nginx.conf as 'include {your_blockips.conf_path}' under http and add the following in /etc/nginx/sites-enabled/* if you have enabled vhosts the following: \n if ($blocked_ips) \n{\nreturn 403;\n}  under location /")
         grep_command = "sudo systemctl restart nginx"
         os.system(grep_command)
   ip_set = read_access_log()
@@ -1141,7 +1141,7 @@ location / {
  
 def ssl_dhparam():
   print(f"{Fore.WHITE}[+]Check whether ssl_dhparam parameter is set  ")
- try:
+  try:
     # Define regex pattern to match SSL protocols
     find_command = "grep ssl_dhparam /etc/nginx/nginx.conf"
 
@@ -1160,7 +1160,7 @@ def ssl_dhparam():
         print(config)       
     else:
         print(f"{Fore.GREEN}[+] ssl_dhparam is present in the file")
- except subprocess.CalledProcessError:
+  except subprocess.CalledProcessError:
         print(f"{Fore.RED}[-] ssl_dhparam is not present in the config file")
         remediate = input(" Want to generate strong DHE (Ephemeral Diffie-Hellman) parameters(y/n) ")
         if remediate.lower() == "y":
@@ -1675,7 +1675,7 @@ def check_session_fixation(url):
     secure_flag = 'secure' in session_cookie
     http_only_flag = 'HttpOnly' in session_cookie
     if secure_flag and http_only_flag:
-        print(f"{Fore.GREEN}[+] Session cookie has secure and HttpOnly flags')
+        print(f'{Fore.GREEN}[+] Session cookie has secure and HttpOnly flags')
     else:
         print(f'{Fore.RED}[-] Session cookie does not have secure and/or HttpOnly flags')
 
@@ -1688,7 +1688,7 @@ def check_session_fixation(url):
         print(f'{Fore.RED}[-] Session fixation vulnerability detected - server-generated SID was accepted')
         print(attack_response.status_code)
     else:
-        print(f"{Fore.WHITE}[-] Server only accepts newly generated SIDs - not vulnerable to session fixation attack')
+        print(f'{Fore.WHITE}[-] Server only accepts newly generated SIDs - not vulnerable to session fixation attack')
 def check_cors_vuln(url):
     print(f"{Fore.WHITE}[+] Check for CORS vulnerabiltites" )
     # Send a request with an origin header to test CORS configuration
@@ -1697,15 +1697,15 @@ def check_cors_vuln(url):
 
     # Check for Access-Control-Allow-Origin header
     if 'access-control-allow-origin' not in response.headers:
-        print(f"{Fore.GREEN}[+] Missing Access-Control-Allow-Origin header!')
+        print(f'{Fore.GREEN}[+] Missing Access-Control-Allow-Origin header!')
     else:
         allowed_origin = response.headers['access-control-allow-origin']
         if allowed_origin == '*':
-            print(f"{Fore.RED}[-] CORS misconfiguration: Allow-Origin set to wildcard (*)')
+            print(f'{Fore.RED}[-] CORS misconfiguration: Allow-Origin set to wildcard (*)')
         elif 'https://malicious-site.com' not in allowed_origin:
             print(f'{Fore.RED}[-] CORS misconfiguration: Allow-Origin does not include malicious site')
         else:
-            print(f"{Fore.GREEN}[+]CORS is configured correctly.')
+            print(f'{Fore.GREEN}[+]CORS is configured correctly.')
 
 if __name__ == '__main__':
   banner = '''
