@@ -16,12 +16,12 @@ import string
 import uuid
 
 def check_nginx_installed():
-    print ("[+] Check the nginx version installed currently")
+    print (f"{Fore.WHITE}[+] Check the nginx version installed currently")
     # run the nginx -v command and use grep to extract the version number
     grep_command = "nginx -v 2>&1 | grep -Po '(?<=nginx/)[0-9]+.[0-9]+.[0-9]+'"
     nginx_version = subprocess.check_output(grep_command, shell=True).decode().strip()
     if nginx_version:
-        print(f"Running nginx version {nginx_version}")   
+        print(f"{Fore.GREEN} Running nginx version {nginx_version}")   
         url = "https://packages.ubuntu.com/focal-updates/nginx"
         response = requests.get(url)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -30,39 +30,39 @@ def check_nginx_installed():
         version_string = version_tag.text.strip()
         latest_version = re.search(r'\d+\.\d+(\.\d+)?', version_string).group()
         if latest_version > nginx_version:
-            print(f"[-] NGINX web server is out of date,The current version is: {nginx_version} and latest version is: {latest_version}")
+            print(f"{Fore.RED} NGINX web server is out of date,The current version is: {nginx_version} and latest version is: {latest_version}")
             remediate = input("Do you want to update NGINX to the latest version? (y/n) ")
             if remediate.lower() == "y":
                 # install_nginx = "git clone https://github.com/nginx/nginx.git"
                 # subprocess.run(install_nginx, shell=True)
                 subprocess.run(['sudo', 'apt-get', 'update'])
                 subprocess.run(['sudo', 'apt-get', 'install', 'nginx'])
-                print("[+] NGINX has been updated to the latest version")
+                print(f"{Fore.GREEN}[+] NGINX has been updated to the latest version")
 
             
             elif remediate.lower() == "n":
-                print("[+] NGINX has not been updated to the latest version")
+                print(f"{Fore.RED}[-] NGINX has not been updated to the latest version")
 
             
             else:
                 print(f"{Fore.RED} NGINX has not been updated")
 
         else:
-            print(f"[+] NGINX version is up to date")
+            print(f"{Fore.GREEN} NGINX version is up to date")
 
     else:
-        print(f"{Fore.RED}[-]Unable to determine nginx version")
+        print(f"{Fore.RED}[-] Unable to determine nginx version")
 
 def installed_from_source():
-    print("[+] Check if nginx is installed from source")
+    print(f"{Fore.WHITE} Check if nginx is installed from source")
     grep_command = "nginx -v 2>&1 | grep -Po '(?<=nginx/)[0-9]+.[0-9]+.[0-9]+'"
     installed_from_source = subprocess.check_output(grep_command, shell=True).decode().strip()
     if installed_from_source:
-        print("NGINX is installed from source.")
+        print(f"{Fore.GREEN} [+] NGINX is installed from source.")
         # Get the current version number from nginx -v
         grep_command = "nginx -v 2>&1 | grep -Po '(?<=nginx/)[0-9]+.[0-9]+.[0-9]+'"
         nginx_version = subprocess.check_output(grep_command, shell=True).decode().strip()
-        print(f"Current NGINX version is {nginx_version}")
+        print(f"{Fore.GREEN} Current NGINX version is {nginx_version}")
         
         # Get the latest version number from GitHub
         url = "https://github.com/nginx/nginx/tags"
@@ -70,10 +70,10 @@ def installed_from_source():
         soup = BeautifulSoup(response.content, 'html.parser')
         release_url = soup.find('a', attrs={'href': re.compile("^/nginx/nginx/releases/tag")}).get('href')
         latest_version = release_url.split("-")[1]
-        print(f"Latest NGINX version is {latest_version}")
+        print(f"{Fore.GREEN}[+] Latest NGINX version is {latest_version}")
         
         if latest_version > nginx_version:
-            print(f"[-] NGINX web server is out of date,The current version is: {nginx_version} and latest version is: {latest_version}")
+            print(f"{Fore.RED}[-] NGINX web server is out of date,The current version is: {nginx_version} and latest version is: {latest_version}")
             remediate = input("Do you want to update NGINX to the latest version? (y/n) ")
             if remediate.lower() == "y":
                 # Download and install the latest version
@@ -83,14 +83,14 @@ def installed_from_source():
                 os.system(tar_command)
                 cd_command = f"cd nginx-{latest_version}"
                 os.system(cd_command)
-                modules = input("Add the modules u want to implement in the web server ")
+                modules = input("Add the modules u want to implement in the web server: ")
                 configure_command = f"./configure {modules}"
                 os.system(configure_command)
                 make_command = "make"
                 os.system(make_command)
                 make_install_command = "make install"
                 os.system(make_install_command)
-                print("[+] NGINX has been updated to the latest version")
+                print(f"{Fore.GREEN}[+] NGINX has been updated to the latest version")
             elif remediate.lower() == "n":
                 print(f"{Fore.RED}[-] NGINX has not been updated to the latest version")
             else:
@@ -98,37 +98,40 @@ def installed_from_source():
         else:
             print(f"{Fore.RED}[-] NGINX version is up to date")
     else:
-        print("NGINX is not installed from source.")
+        print(f"{Fore.GREEN}[+] NGINX is not installed from source.")
     
     # Get the current version number from nginx -v
     grep_command = "nginx -v 2>&1 | grep -Po '(?<=nginx/)[0-9]+.[0-9]+.[0-9]+'"
     nginx_version = subprocess.check_output(grep_command, shell=True).decode().strip()
 def check_url_directory_listing(url):
+    print(f"{Fore.WHITE} Check whether directory listing is disabled")
     response = requests.get(url,allow_redirects=False)
     if "Index of" in response.text:
-        print("[-] Directory listing enabled")
+        print(f"{Fore.RED}[-] Directory listing enabled")
     else:
-        print(f"{Fore.RED} [-] Directory listing disabled")
+        print(f"{Fore.GREEN}[+] Directory listing disabled")
     
 # Audit for http_dav_module
 def audit_http_dav_module():
+    print(f"{Fore.WHITE} Check whether http_dav_module is disabled")
     command = 'nginx -V 2>&1 | grep http_dav_module'
     output = subprocess.check_output(command, shell=True).decode(sys.stdout.encoding).strip()
     if output:
         print(f'{Fore.RED}[-] http_dav_module is installed')
     else:
-        print('[+] http_dav_module is not installed')
+        print(f"{Fore.GREEN} http_dav_module is not installed')
 
 # Audit for gzip modules
 def audit_gzip_modules():
+    print(f"{Fore.WHITE} Check whether gzip_modules are disabled")
     command = 'nginx -V 2>&1 | grep -E "(http_gzip_module|http_gzip_static_module)"'
     output = subprocess.check_output(command, shell=True).decode(sys.stdout.encoding).strip()
     if output:
         print(f'{Fore.RED}[-] gzip modules are installed')
     else:
-        print('[+] gzip modules are not installed')    
+        print(f'{Fore.GREEN} gzip modules are not installed')    
 def account_security():
-    print("[+] Ensure that NGINX is run using a non-privileged, dedicated service account and check whether the service accounts are locked")
+    print(f"{Fore.WHITE} Ensure that NGINX is run using a non-privileged, dedicated service account and check whether the service accounts are locked")
     nginxfolderDir = r'/etc/nginx/'
     if not os.path.isdir(nginxfolderDir):
         nginxfolderDir = input('Enter the location of the config folder: ')
@@ -146,24 +149,24 @@ def account_security():
        www = users[1]
        nginx = users[0]
        if user == www:
-          print(f"A dedicated nginx user called {user} exists")
+          print(f"{Fore.GREEN} A dedicated nginx user called {user} exists")
           priv_command = "sudo -l -U {} |  grep -io 'not allowed to run sudo'".format(user)
           get_priv = subprocess.check_output(priv_command, shell=True).decode().strip()
           if get_priv:
-             print(f"[+] A dedicated nginx user called {user} is not privileged")
+             print(f"{Fore.GREEN} A dedicated nginx user called {user} is not privileged")
              grp_command = f"groups {user}  | grep -io '{user} : {user}' "
              get_grp = subprocess.check_output(grp_command, shell=True).decode().strip()
              if get_grp:
-                print(f"[+] The nginx dedicated user {user} is not part of any unexpected groups")
+                print(f"{Fore.GREEN} The nginx dedicated user {user} is not part of any unexpected groups")
              elif not get_grp:
                 print(f"{Fore.RED}[-] The nginx dedicated user {user} is part of any unexpected groups")
              else:
                 print(f'{Fore.RED}[-]No nginx group found')
-                print('[-] Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
+                print(f"{Fore.GREEN} Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
           else:
             print(f"{Fore.RED}[-] A dedicated nginx user called {user} is privileged")        
        elif user == nginx :
-          print(f"[+] A dedicated nginx user called {user} exists")
+          print(f"{Fore.GREEN} A dedicated nginx user called {user} exists")
           priv_command = "sudo -l -U {} |  grep -io 'not allowed to run sudo'".format(user)
           get_priv = subprocess.check_output(priv_command, shell=True).decode().strip()
           if get_priv:
@@ -171,19 +174,19 @@ def account_security():
              grp_command = f"groups {user}  | grep -io '{user} : {user}' "
              get_grp = subprocess.check_output(grp_command, shell=True).decode().strip()
              if get_grp:
-                print(f"[+] The nginx dedicated user {user} is not part of any unexpected groups")
+                print(f"{Fore.GREEN} The nginx dedicated user {user} is not part of any unexpected groups")
              elif not get_grp:
                 print(f"{Fore.RED}[-] The nginx dedicated user {user} is part of any unexpected groups")
              else:
                 print(f'{Fore.RED}[-] No nginx group found')
-                print('[-] Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
+                print(f'{Fore.WHITE}[+] Make sure that a dedicated group directive present in the {} file\n'.format(nginx_configfile))
           else:
             print(f"{Fore.RED}[-] A dedicated nginx user called {user} is  privileged")                   
        else:
           print(f"{Fore.RED}[-] {user} is not a dedicated user")      
     elif not get_acc:
        print(f'{Fore.RED}[-] A dedicated nginx user does not exist')
-       print('[-] Make sure that a dedicated user directive exist in the {} file\n'.format(nginx_configfile))
+       print(f'{Fore.WHITE}[+] Make sure that a dedicated user directive exist in the {} file\n'.format(nginx_configfile))
        remediate = input("Do you want to fix this issue? (y/n) ")
        
        if remediate.lower() == "y":
@@ -203,7 +206,7 @@ def account_security():
        else:
            print(f"{Fore.RED}[-] Something wrong has occured")
     else:
-      print('[-] A dedicated nginx user does not exist')   
+      print(f'{Fore.RED}[-] A dedicated nginx user does not exist')   
 
 # Ensure Nginx User is Locked
     if os.popen('passwd -S {}'.format(user)).read().split()[1] != 'L':
@@ -227,12 +230,12 @@ def account_security():
        elif remediate.lower() == "n":
           print(f'{Fore.RED} [-] The nginx user still has an invalid login shell')            
     else:
-       print('[+] The nginx user does not have an invalid login shell')         
+       print(f'{Fore.RED}[+] The nginx user does not have an invalid login shell')         
        grep_command = f"usermod -s /sbin/nologin {user}"
        os.system(grep_command)
        
 def directories_perms():
-    print("[+] Check the permissions of the /etc/nginx directory")
+    print(f"{Fore.WHITE}[+] Check the permissions of the /etc/nginx directory to have the appropriate ")
     configDir = r'/etc/nginx'
     if not os.path.isdir(configDir):
         configDir = input('Enter the location of the config folder:')
@@ -263,7 +266,7 @@ def directories_perms():
         grep_command = f" stat {configDir} "
         os.system(grep_command)           
 def restricted_perms():
-    print("[+] Ensure access to NGINX directories and files is restricted")
+    print(f'{Fore.WHITE}[+] Ensure access to NGINX directories and files is restricted")
     configDir = r'/etc/nginx'
     if not os.path.isdir(configDir):
         configDir = input('Enter the location of the config folder:')
@@ -285,7 +288,7 @@ def restricted_perms():
         if remediate.lower() == "y":   
           grep_command = f" sudo chmod go-w {configDir}  "
           os.system(grep_command)
-          print(f"[+] Permissions are set with the ability to read as other by default on the configuration directory {configDir}: -rw-r--r-- ")     
+          print(f'{Fore.GREEN}[+]Permissions are set with the ability to read as other by default on the configuration directory {configDir}: -rw-r--r-- ")     
         elif remediate.lower() == "n":
           print(f"{Fore.RED}[-] Permissions are not set with the ability to read as other by default on the configuration directory {configDir}: -rw-r--r-- ")     
       elif not dir_perm_int <= 755:
@@ -296,19 +299,19 @@ def restricted_perms():
             if remediate.lower() == "y":   
                grep_command = f"sudo chmod go-w {path1}  "
                os.system(grep_command)
-               print(f"[+] Permissions are set with the ability to read as other by default on the configuration directory {path1}: -rw-r--r-- ")     
+               print(f"{Fore.GREEN}[+] Permissions are set with the ability to read as other by default on the configuration directory {path1}: -rw-r--r-- ")     
             elif remediate.lower() == "n":
                print(f"{Fore.RED}[-]Permissions are not set with the ability to read as other by default on the configuration directory {path1}: -rw-r--r-- ")
                  
       else:
-           print(f"[+] Access to NGINX directories are restricted ")   
+           print(f"{Fore.GREEN}[+] Access to NGINX directories are restricted ")   
            grep_command = f" stat {configDir} | grep -io 755 "
-           print(f"[+] Access to /etc/nginx directory is restricted: ")   
+           print(f"{Fore.GREEN}[+] Access to /etc/nginx directory is restricted: ")   
            os.system(grep_command)  
            for root, dirs,files  in os.walk(configDir):
             for name in dirs:
                 path= os.path.join(root, name)
-                print(f"[+] Access to NGINX directory {path}  is restricted ") 
+                print(f"{Fore.GREEN}[+] Access to NGINX directory {path}  is restricted ") 
                 grep_command1 = f" stat {path} | grep -io 755 "
                 os.system(grep_command1)            
     except subprocess.CalledProcessError as e:
@@ -331,17 +334,17 @@ def restricted_perms():
             if remediate_input.lower() == "y":
                 grep_command = "sudo find /etc/nginx -type f -exec chmod ug-x,o-rwx {} +"
                 os.system(grep_command)
-                print(f"[+] Permissions are set to restrict access to NGINX directory files: -rw-rw----")
+                print(f"{Fore.GREEN}[+] Permissions are set to restrict access to NGINX directory files: -rw-rw----")
             else:
                 print(f"{Fore.RED}[-] Permissions are set with the ability to read and execute as other by default on directory file : -rw-rw-r--")
         else:
-            print(f"[+] Access to NGINX directory is restricted: -rw-rw----")
+            print(f"{Fore.WHITE}[+] Access to NGINX directory is restricted: -rw-rw----")
     except subprocess.CalledProcessError:
         print(f"{Fore.RED}[-] Some files don't exist")
         grep_command3 = "sudo find /etc/nginx -type f -exec stat -Lc '%n %a' {} +"
         os.system(grep_command3)
 def core_dump():
-  print("[+]  Ensure the core dump directory is secured")
+  print(f"{Fore.GREEN}[+] Ensure the core dump directory is secured")
   # Set the nginx configuration file path
   nginx_conf = "/etc/nginx/nginx.conf"
 
@@ -361,7 +364,7 @@ def core_dump():
     elif os.stat(working_directory_value).st_mode & 0o777 != 0o750:
         print(f"{Fore.RED}[-] The working_directory has read-write-search access permission for other users, which is not secure.")
     else:
-        print("[+] The working_directory configuration is secure.")
+        print(f"{Fore.GREEN}[+] The working_directory configuration is secure.")
   else:
     print(f"{Fore.RED}[-] The working_directory directive is not configured in nginx.conf.")                
 
@@ -380,7 +383,7 @@ def secure_pid():
     perm = subprocess.check_output(grep_command1, shell=True).decode().strip()
     perm_int = int(perm)  
     if not own == "root:root" :
-        print(f"[-] The PID file is not owned by root, it is owned by {own}")
+        print(f"{Fore.RED}[+]The PID file is not owned by root, it is owned by {own}")
         remediate = input("Do you want to fix this issue? (y/n) ")
         if remediate.lower() == "y":   
           grep_command = f" chown root:root {nginx_configfile}  "
@@ -395,19 +398,19 @@ def secure_pid():
           if remediate.lower() == "y":   
            grep_command = f" chmod u-x,go-wx  {nginx_configfile}  "
            os.system(grep_command)
-           print(f"[+] The PID file {nginx_configfile}'s permissions is now set correctly ")     
+           print(f"{Fore.GREEN}[+] The PID file {nginx_configfile}'s permissions is now set correctly ")     
           elif remediate.lower() == "n":
            print(f"{Fore.RED}[-] The PID file {nginx_configfile}'s permissions is still not set correctly   ")              
                
     else:
-           print("[+] The PID file's ownership and permissions are set correctly")
+           print(f"{Fore.GREEN}[+] The PID file's ownership and permissions are set correctly")
            grep_command3 = f"stat -L -c '%U:%G' {nginx_configfile} && stat -L -c '%a' {nginx_configfile}"
            os.system(grep_command3)
 
 
 
 def block_ips():
-  print("[+] Block IP addresses that have tried to conduct malicious injections of the web server's URL ")
+  print(f"{Fore.WHITE}[+]  Block IP addresses that have tried to conduct malicious injections of the web server's URL ")
   access_log_path = r'/var/log/nginx/access.log'
   payload = r'payloads.txt'
   nginxfolderDir = r'/etc/nginx/conf.d/'
@@ -445,14 +448,14 @@ def block_ips():
   # Block IP addresses using ngx_http_geo_module
   def block_ips(ip_set):
         if not ip_set:
-           print("[+] No IP addresses connected to the web server performing malicious injections ")
+           print(f"{Fore.GREEN}[+]  No IP addresses connected to the web server performing malicious injections ")
         with open(blockips_conf_path, 'w') as f:
             f.write('geo $blocked_ips {\n')
             f.write('    default 0;\n')
             for ip in ip_set:
                 f.write('    {0} 1;\n'.format(ip))
             f.write('}\n')
-            print("[+] Blacklisted the IP addresses successfully at blockips.conf file and add the file name on the nginx.conf as 'include {your_blockips.conf_path}' under http and add the following in /etc/nginx/sites-enabled/* if you have enabled vhosts the following: \n if ($blocked_ips) \n{\nreturn 403;\n}  under location /")
+            print(f"{Fore.GREEN}[+] Blacklisted the IP addresses successfully at blockips.conf file and add the file name on the nginx.conf as 'include {your_blockips.conf_path}' under http and add the following in /etc/nginx/sites-enabled/* if you have enabled vhosts the following: \n if ($blocked_ips) \n{\nreturn 403;\n}  under location /")
         grep_command = "sudo systemctl restart nginx"
         os.system(grep_command)
   ip_set = read_access_log()
@@ -460,7 +463,7 @@ def block_ips():
   
         
 def network_conn():
-    print("[+] Check whether NGINX only listens for network connections on authorized ports  ")
+    print(f"{Fore.WHITE}[+] Check whether NGINX only listens for network connections on authorized ports  ")
     # Use subprocess to execute the command
     grep_command = "find /etc/nginx -type f,d -not -path '/etc/nginx/*' -exec grep -rE 'listen[^;]*;' {} + | grep -E '80' "
     grep_command1 = "find /etc/nginx -type f,d -not -path '/etc/nginx/*' -exec grep -rE 'listen[^;]*;' {} + | grep -E '443' "
@@ -482,10 +485,10 @@ def network_conn():
       listen_net1= subprocess.check_output(grep_command1, shell=True).decode().strip()
       if not (listen_net1):
            print(f"{Fore.RED}[-]  NGINX does not listen to authorized ports like 443")
-           print("Remediation : Comment out or delete the associated configuration for that listener")
+           print(f"{Fore.WHITE}[+] Remediation : Comment out or delete the associated configuration for that listener")
            os.system(grep_command1)
       elif (listen_net  )  is None :
-           print(f"{Fore.RED}[-] NGINX does not listen to any ports  ")
+           print(f"{Fore.WHITE}[+] NGINX does not listen to any ports  ")
            os.system(grep_command1)
       else:
            print("[+] NGINX only listens for network connections on authorized ports like 443  ")   
@@ -493,7 +496,7 @@ def network_conn():
     except subprocess.CalledProcessError as e:
                 print(f"{Fore.RED}[-] Unable to check for connections as the some files in the /etc/nginx  directory don't have listners,thus check manually for those files ")
                 os.system(grep_command1)
-    print("[+] Check for files under the conf.d directory and check whether they listen for connections and add the output.txt generated with the filenames to continue")
+    print(f"{Fore.WHITE} Check for files under the conf.d directory and check whether they listen for connections and add the output.txt generated with the filenames to continue")
     grep_conf = "grep -E 'include\s+/etc/nginx/conf\.d/[^;]+\.conf;' /etc/nginx/nginx.conf | grep -o '/etc/nginx/conf\.d/[^;]\+\.conf' > output.txt"    
     os.system(grep_conf)
     output_file = r'output.txt'
@@ -510,13 +513,13 @@ def network_conn():
              grep_command1 = f"grep -ir 'listen[^;]*;' {output} | grep -E '80' "
       listen_net= subprocess.check_output(grep_command1, shell=True).decode().strip()
       if not (listen_net ):
-           print("[-]  NGINX does not listen to authorized ports like 80")
+           print(f"{Fore.RED}[-] NGINX does not listen to authorized ports like 80")
            os.system(grep_command1)
       elif (listen_net  )  is None :
-           print(f"{Fore.RED}[-] NGINX does not listen to any ports   ")
+           print(f"{Fore.WHITE}[+] NGINX does not listen to any ports   ")
            os.system(grep_command1)
       else:
-           print("[+] NGINX only listens for network connections on authorized ports like 80  ")   
+           print(f"{Fore.GREEN} NGINX only listens for network connections on authorized ports like 80  ")   
            os.system(grep_command1)         
     except subprocess.CalledProcessError as e:
                 print(f"{Fore.RED}[-] Unable to check for connections as the some files in the conf.d directory don't have listners, thus check manually for those files ")
@@ -528,7 +531,7 @@ def network_conn():
              grep_command2 = f"grep -ir 'listen[^;]*;' {output}| grep -E '443' "
       listen_net1= subprocess.check_output(grep_command2, shell=True).decode().strip()
       if not (listen_net1 ):
-           print("[-]  NGINX does not listen to authorized ports like 443")
+           print(f"{Fore.RED}[-] NGINX does not listen to authorized ports like 443")
            os.system(grep_command1)
       elif (listen_net1  )  is None :
            print(f"{Fore.RED}[-] NGINX does not listen to any ports ")
@@ -537,7 +540,7 @@ def network_conn():
            print(f"{Fore.RED}[-]NGINX only listens for network connections on authorized ports like 443  ")   
            os.system(grep_command1)         
     except subprocess.CalledProcessError as e:
-                print(f"[-] Unable to check for connections as the some files in the conf.d directory don't have listners, thus check manually for those files ")
+                print(f"{Fore.RED}[-]Unable to check for connections as the some files in the conf.d directory don't have listeners, thus check manually for those files ")
                 cat_output ="cat output.txt"
                 os.system(cat_output)             
 def curl_host(url):
@@ -551,19 +554,19 @@ def curl_host(url):
     codes_str = " ".join(codes)
     response_int = int(codes_str)
     if response_int >= 400:
-        print("[+] Requests for unknown host names are being rejected")
-        print(f"HTTP response code: {response_int}")
+        print(f"{Fore.GREEN}[+]Requests for unknown host names are being rejected")
+        print(f"{Fore.GREEN}[+]HTTP response code: {response_int}")
     else:
         print(f"{Fore.RED}[-] Requests for unknown host names are not being rejected")
-        print(f"HTTP response code: {response_int}")
+        print(f"{Fore.GREEN}[-] HTTP response code: {response_int}")
         example = '''
         server {
           return 404;
             }
         '''
-        print("Remediation : \nEnsure your first server block mirrors the below in your nginx configuration, either at /etc/nginx/nginx.conf or any included file within your nginx config:\n" + example )    
+        print(f"{Fore.WHITE}[+] Remediation : \nEnsure your first server block mirrors the below in your nginx configuration, either at /etc/nginx/nginx.conf or any included file within your nginx config:\n" + example )    
   except subprocess.CalledProcessError :
-    print(f"{Fore.RED}[-] Requests for unknown host names are not being rejected")
+    print(f"{Fore.RED}[-]Requests for unknown host names are not being rejected")
     bad_curl_cmd = f"  curl -k -v --silent {url} -H 'Host: invalid.host.com' 2>&1 | head -n 10 "
     os.system(bad_curl_cmd)
     example = '''
@@ -571,9 +574,9 @@ def curl_host(url):
           return 404;
             }
         '''
-    print("Remediation : \nEnsure your first server block mirrors the below in your nginx configuration, either at /etc/nginx/nginx.conf or any included file within your nginx config:\n" + example )    
+    print(f"{Fore.WHITE}[+]Remediation : \nEnsure your first server block mirrors the below in your nginx configuration, either at /etc/nginx/nginx.conf or any included file within your nginx config:\n" + example )    
 def keepalive_timeout():
-  print("[+] Ensure keepalive_timeout is 10 seconds or less, but not 0 ")
+  print(f"{Fore.WHITE}[+]Ensure keepalive_timeout is 10 seconds or less, but not 0 ")
   try:
     grep_command = "grep -ir keepalive_timeout /etc/nginx"
     output = subprocess.check_output(grep_command, shell=True, text=True)
@@ -581,32 +584,32 @@ def keepalive_timeout():
     number = re.findall(r"([1-9]|10)", output)[0]
     response_int = int(number)  
     if response_int <= 10:
-        print("[+] Timeout is set to 10 seconds or less")
+        print(f"{Fore.GREEN}[+]Timeout is set to 10 seconds or less")
         os.system(grep_command)         
     elif response_int == 0:
-        print(f"{Fore.RED}[-] Timeout is set to 0")
+        print(f"{Fore.RED}[-]Timeout is set to 0")
         os.system(grep_command)   
         example = '''
        keepalive_timeout 10;                                
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration, and add the keepalive_timeout directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )    
+        print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration, and add the keepalive_timeout directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )    
     else:
-        print("[+] Timeout is set to more than 10 seconds ")
+        print(f"{Fore.RED}[-] Timeout is set to more than 10 seconds ")
         os.system(grep_command)               
         example = '''
        keepalive_timeout 10;                                
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration, and add the keepalive_timeout directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )    
+        print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration, and add the keepalive_timeout directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )    
   except subprocess.CalledProcessError :
        print(f"{Fore.RED}[-] Timeout is not set ")
        os.system(grep_command)               
        example = '''
        keepalive_timeout 10;                                
         '''
-       print("Remediation : \nFind the HTTP or server block of your nginx configuration, and add the keepalive_timeout directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )     
+       print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration, and add the keepalive_timeout directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )     
   #grep -ir send_timeout /etc/nginx
 def send_timeout():
-  print("[+] Ensure send_timeout is 10 seconds or less, but not 0 ")
+  print(f"{Fore.WHITE}[+]Ensure send_timeout is 10 seconds or less, but not 0 ")
   try:
     grep_command = "grep -ir send_timeout /etc/nginx"
     output = subprocess.check_output(grep_command, shell=True, text=True)
@@ -614,7 +617,7 @@ def send_timeout():
     number = re.findall(r"([1-9]|10)", output)[0]
     response_int = int(number)  
     if response_int <= 10:
-        print("[+] Timeout is set to 10 seconds or less")
+        print(f"{Fore.GREEN}[+] Timeout is set to 10 seconds or less")
         os.system(grep_command)         
     elif response_int == 0:
         print(f"{Fore.RED}[-] Timeout is set to 0")
@@ -622,9 +625,9 @@ def send_timeout():
         example = '''
        send_timeout 10;                                
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration, and add the send_timeout  directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )    
+        print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration, and add the send_timeout  directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )    
     else:
-        print("[+] Timeout is set to more than 10 seconds ")
+        print(f"{Fore.RED}[-] Timeout is set to more than 10 seconds ")
         os.system(grep_command)               
         example = '''
        send_timeout 10;                                
@@ -638,7 +641,7 @@ def send_timeout():
         '''
        print("Remediation : \nFind the HTTP or server block of your nginx configuration, and add the send_timeout directive. Set it to 10 seconds or less, but not 0. This example command sets it to 10 seconds:\n" + example )     
 def server_tokens (url):
- print("[+] Ensure server_tokens directive is set to `off` ")
+ print(f"{Fore.WHITE}[+]Ensure server_tokens directive is set to `off` ")
  try:
     curl_cmd = f"curl -I --silent {url}  | grep -i server "
     response = subprocess.check_output(curl_cmd, shell=True).decode().strip()
@@ -652,12 +655,12 @@ def server_tokens (url):
         ...
         }
         '''
-        print("Remediation : \nDisable the server_tokens directive, set it to off inside of every server block in your nginx.conf or in the http block:\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nDisable the server_tokens directive, set it to off inside of every server block in your nginx.conf or in the http block:\n" + example )       
     else:
-        print("[+] Doesn't contain the server header providing the server version ")
+        print(f"{Fore.GREEN}[+] Doesn't contain the server header providing the server version ")
         os.system(curl_cmd)  
  except subprocess.CalledProcessError :
-        print(f"{Fore.RED}[-] Doesn't contain the server header providing the server version ")
+        print(f"{Fore.GREEN}[+] Doesn't contain the server header providing the server version ")
         os.system(curl_cmd)  
 def error_html():
  print("[+] Ensure default error and index.html pages do not reference NGINX ")
@@ -668,25 +671,25 @@ def error_html():
     if refer:
         print(f"{Fore.RED}[-] The html pages references nginx")
         os.system(html_cmd)  
-        print("Remediation :\nEdit /usr/share/nginx/html/index.html and remove any lines that reference NGINX."  )       
+        print(f"{Fore.WHITE}[+]Remediation :\nEdit /usr/share/nginx/html/index.html and remove any lines that reference NGINX."  )       
     else:
-        print("[+] The html pages does not reference nginx")
+        print(f"{Fore.GREEN}[+] The html pages does not reference nginx")
         os.system(html_cmd)  
  except subprocess.CalledProcessError :
-        print(f"{Fore.RED}[-]  The html pages does not reference nginx ")
+        print(f"{Fore.WHITE}[+] The html pages does not reference nginx ")
         os.system(html_cmd)  
 def hidden_file ():
- print("[+] Ensure hidden file serving is disabled ")
+ print(f"{Fore.WHITE}[+]Ensure hidden file serving is disabled ")
    #grep -i '^\s*location\s+~\s*/\.[^{]*{\s*deny\s+all;\s*return\s+404;\s*}' /etc/nginx/nginx.conf
  try:
     hidden_cmd = "grep location /etc/nginx/nginx.conf "
     cmd = subprocess.check_output(hidden_cmd, shell=True).decode().strip()
     hidden = re.findall(r"^\s*location\s+~\s*/\.[^{]*{\s*deny\s+all;\s*return\s+404;\s*} ", cmd)
     if hidden:
-        print("[+] The hidden file serving is disabled ")
+        print(f"{Fore.GREEN}[+] The hidden file serving is disabled ")
         os.system(hidden_cmd)  
     else:
-        print("[-] The hidden file serving is enabled")
+        print(f"{Fore.RED}[-]The hidden file serving is enabled")
         os.system(hidden_cmd)  
         example = ''' 
         location ~ /\. { 
@@ -704,7 +707,7 @@ def hidden_file ():
         return 404;
         }
         '''
-        print("Remediation : \nEdit the nginx.conf file and add the following line:\n" + example )    
+        print(f"{Fore.WHITE}[+]Remediation : \nEdit the nginx.conf file and add the following line:\n" + example )    
 def reverse_proxy():
     print("[+] Ensure the NGINX reverse proxy does not enable information disclosure ")
     # Use subprocess to execute the command
@@ -725,13 +728,13 @@ def reverse_proxy():
            }
 
         '''
-           print("Remediation : \nImplement the below directives as part of your location block. Edit /etc/nginx/nginx.conf and add the following:\n" + example )   
+           print(f"{Fore.WHITE}[+]Remediation : \nImplement the below directives as part of your location block. Edit /etc/nginx/nginx.conf and add the following:\n" + example )   
       else:
-           print(f"[-] NGINX reverse proxy has X-Powered-By and Server set  ")   
+           print(f"{Fore.GREEN}[+]NGINX reverse proxy has X-Powered-By and Server set  ")   
            proxy = " grep proxy_hide_header /etc/nginx/nginx.conf"
            os.system(proxy)         
     except subprocess.CalledProcessError :
-          print("[-] NGINX reverse  proxy does not have proxy_hide_header itself set")
+          print(f"{Fore.RED}[-]NGINX reverse  proxy does not have proxy_hide_header itself set")
           example = ''' 
            location /docs {
             ....
@@ -741,38 +744,38 @@ def reverse_proxy():
            }
 
         '''
-          print("Remediation : \nImplement the below directives as part of your location block. Edit /etc/nginx/nginx.conf and add the following:\n" + example )   
+          print(f"{Fore.WHITE}[+]Remediation : \nImplement the below directives as part of your location block. Edit /etc/nginx/nginx.conf and add the following:\n" + example )   
 def access_log_enabled():
- print("[+] Ensure access logging is enabled")
+ print(f"{Fore.WHITE}[+] Ensure access logging is enabled")
  try:
     access_cmd = "grep -ir access_log /etc/nginx "
     cmd = subprocess.check_output(access_cmd, shell=True).decode().strip()
     access = re.findall(r"access_log\s+.*?\s+(?:on|ON)\b", cmd, re.IGNORECASE)
 
     if access:
-        print("[-] Access logging is disabled ")
+        print(f"{Fore.GREEN}[+] Access logging is disabled ")
         os.system(access_cmd)  
         example = ''' 
       access_log /var/log/nginx/host.access.log main;
         '''
-        print("Remediation : \nEnsure the access_log directive is configured for every core site your organization requires logging for.This should look similar to the below configuration snippet. \nYou may use different log file locations based on your needs:\n" + example )     
+        print(f"{Fore.WHITE}[+]Remediation : \nEnsure the access_log directive is configured for every core site your organization requires logging for.This should look similar to the below configuration snippet. \nYou may use different log file locations based on your needs:\n" + example )     
     else:
-        print("[+] Access logging is enabled")
+        print(f"{Fore.GREEN}[+] Access logging is enabled")
         os.system(access_cmd)    
  except subprocess.CalledProcessError :
-        print("[-] Access Logging does not exist")
+        print(f"{Fore.RED}[-] Access Logging does not exist")
         os.system(access_cmd)  
         example = ''' 
       access_log /var/log/nginx/host.access.log main;
         '''
-        print("Remediation : \nEnsure the access_log directive is configured for every core site your organization requires logging for.This should look similar to the below configuration snippet. \nYou may use different log file locations based on your needs:\n" + example )     
+        print(f"{Fore.WHITE}[+]Remediation : \nEnsure the access_log directive is configured for every core site your organization requires logging for.This should look similar to the below configuration snippet. \nYou may use different log file locations based on your needs:\n" + example )     
 def error_log():
- print("[+] Ensure error logging is enabled and set to the info logging level ")
+ print(f"{Fore.WHITE}[+] Ensure error logging is enabled and set to the info logging level ")
  try:
     error_cmd = "grep '^\s*[^#]*error_log.*info' /etc/nginx/nginx.conf "
     cmd = subprocess.check_output(error_cmd, shell=True).decode().strip()
     if cmd:
-        print("[+] Error logging is enabled and set to the info logging level ")
+        print(f"{Fore.GREEN}[+] Error logging is enabled and set to the info logging level ")
         os.system(error_cmd)  
 
     else:
@@ -780,43 +783,43 @@ def error_log():
         example = ''' 
         error_log /var/log/nginx/error_log.log info;
         '''
-        print("Remediation : \nEdit /etc/nginx/nginx.conf so the error_log directive is present and not commented out. The error_log should be configured to the logging location of your choice. \nThe configuration should look similar to the below\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nEdit /etc/nginx/nginx.conf so the error_log directive is present and not commented out. The error_log should be configured to the logging location of your choice. \nThe configuration should look similar to the below\n" + example )       
  except subprocess.CalledProcessError :
         print(f"{Fore.RED}[-] Error logging is not enabled and not set to the info logging level or commented out  ")  
         example = ''' 
         error_log /var/log/nginx/error_log.log info;
         '''
-        print("Remediation : \nEdit /etc/nginx/nginx.conf so the error_log directive is present and not commented out. The error_log should be configured to the logging location of your choice. \nThe configuration should look similar to the below\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nEdit /etc/nginx/nginx.conf so the error_log directive is present and not commented out. The error_log should be configured to the logging location of your choice. \nThe configuration should look similar to the below\n" + example )       
 def log_files():
- print("[+] Ensure log files are rotated ")
+ print(f"{Fore.WHITE}[+] Ensure log files are rotated ")
  try:
     log_cmd = "cat /etc/logrotate.d/nginx  "
     cmd = subprocess.check_output(log_cmd, shell=True).decode().strip()
     weekly = re.findall(r"weekly", cmd)
     if weekly:
-        print("[+] Log compression occurs weekly")
+        print(f"{Fore.GREEN}[+]Log compression occurs weekly")
         os.system(log_cmd)  
 
     else:
-        print("[-] Log compression does not occur weekly ")
+        print(f"{Fore.RED}[-] Log compression does not occur weekly ")
         os.system(log_cmd)  
         example = ''' 
     sed -i "s/daily/weekly/" /etc/logrotate.d/nginx
         '''
-        print("Remediation : \nFollow the below procedure to change the default configuration to the recommended log rotation configuration. You may need to manually edit the /etc/logrotate.d/nginx file or change the below command if the configuration is not the default.\nTo change log compression from daily to weekly\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nFollow the below procedure to change the default configuration to the recommended log rotation configuration. You may need to manually edit the /etc/logrotate.d/nginx file or change the below command if the configuration is not the default.\nTo change log compression from daily to weekly\n" + example )       
  except subprocess.CalledProcessError :
-        print("[-] Log file does not exist")
+        print(f"{Fore.RED}[-] Log file does not exist")
         os.system(log_cmd)  
         example = ''' 
     sed -i "s/daily/weekly/" /etc/logrotate.d/nginx
         '''
-        print("Remediation : \nEnsure that this file exists and follow the below procedure to change the default configuration to the recommended log rotation configuration. You may need to manually edit the /etc/logrotate.d/nginx file or change the below command if the configuration is not the default.\nTo change log compression from daily to weekly\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nEnsure that this file exists and follow the below procedure to change the default configuration to the recommended log rotation configuration. You may need to manually edit the /etc/logrotate.d/nginx file or change the below command if the configuration is not the default.\nTo change log compression from daily to weekly\n" + example )       
  try:
     log_cmd = "cat /etc/logrotate.d/nginx "
     cmd = subprocess.check_output(log_cmd, shell=True).decode().strip()
     rotate = re.findall(r"rotate\s+13", cmd)
     if rotate:
-        print("[+] Log rotation happens every 13 weeks")
+        print(f"{Fore.GREEN}[+] Log rotation happens every 13 weeks")
         os.system(log_cmd)  
 
     else:
@@ -824,16 +827,16 @@ def log_files():
         example = ''' 
      sed -i "s/rotate {current setting}/rotate 13/" /etc/logrotate.d/nginx
         '''
-        print("Remediation : \nTo change log rotation from your current setting to every 13 weeks: \n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nTo change log rotation from your current setting to every 13 weeks: \n" + example )       
  except subprocess.CalledProcessError :
-        print("[-] Log file does not exist")
+        print(f"{Fore.RED}[-]Log file does not exist")
         os.system(log_cmd)  
         example = ''' 
          sed -i "s/rotate {current setting}/rotate 13/" /etc/logrotate.d/nginx
         '''
-        print("Remediation : \nCreate a log file and change log rotation from  your current setting to every 13 weeks: \n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nCreate a log file and change log rotation from  your current setting to every 13 weeks: \n" + example )       
 def error_log_syslog():
- print("[+] Ensure error logs are sent to a remote syslog server")
+ print(f"{Fore.WHITE}[+] Ensure error logs are sent to a remote syslog server")
  try:
     log_cmd = "grep -ir syslog /etc/nginx  "
     cmd = subprocess.check_output(log_cmd, shell=True).decode().strip()
@@ -841,7 +844,7 @@ def error_log_syslog():
     pattern =  r"(#?\s*error_log syslog:server=" + re.escape(ip_address) + r" info)"
     matches = re.findall(pattern, cmd)
     if matches:
-        print("[+] Error logs are  sent to a syslog server")
+        print(f"{Fore.GREEN}[+] Error logs are  sent to a syslog server")
         os.system(log_cmd)  
 
     else:
@@ -850,16 +853,16 @@ def error_log_syslog():
         example = ''' 
     error_log syslog:server={your_IP_Addr} info;
         '''
-        print("Remediation : \nTo enable central logging for your error logs, add the below line to your server block in your server configuration file. \nAdd the IP Address of  your central log server.\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nTo enable central logging for your error logs, add the below line to your server block in your server configuration file. \nAdd the IP Address of  your central log server.\n" + example )       
  except subprocess.CalledProcessError :
         print(f"{Fore.RED}[-]Error log directive does not exist")
         os.system(log_cmd)  
         example = ''' 
     error_log syslog:server={your_IP_Addr} info;
         '''
-        print("Remediation : \nTo enable central logging for your error logs, add the below line to your server block in your server configuration file.\n Add the IP Address of  your central log server.\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \nTo enable central logging for your error logs, add the below line to your server block in your server configuration file.\n Add the IP Address of  your central log server.\n" + example )       
 def access_log_syslog():
- print("[+] Ensure access logs are sent to a remote syslog server ")
+ print(f"{Fore.WHITE}[+]Ensure access logs are sent to a remote syslog server ")
  try:
     log_cmd = "grep -ir syslog /etc/nginx  "
     cmd = subprocess.check_output(log_cmd, shell=True).decode().strip()
@@ -867,7 +870,7 @@ def access_log_syslog():
     pattern = r"(?<!#)\s*access_log\s+syslog:server=" + re.escape(ip_address)
     matches = re.findall(pattern, cmd)
     if matches:
-        print("[+] Access logs are sent to a syslog server")
+        print(f"{Fore.GREEN}[+] Access logs are sent to a syslog server")
         os.system(log_cmd)  
 
     else:
@@ -877,25 +880,25 @@ def access_log_syslog():
     access_log syslog:server={your_IP_Addr},facility=local7,tag=nginx,severity=info 
     combined; 
         '''
-        print("Remediation : \n To enable central logging for your access logs, add the below line to your server block in your server configuration file. 192.168.2.1 should be replaced with the location of your central log server. The local logging facility may be changed to any unconfigured facility on your server\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \n To enable central logging for your access logs, add the below line to your server block in your server configuration file. 192.168.2.1 should be replaced with the location of your central log server. The local logging facility may be changed to any unconfigured facility on your server\n" + example )       
  except subprocess.CalledProcessError :
-        print("[-] Access log directive does not exist")
+        print(f"{Fore.RED}[+] Access log directive does not exist")
         os.system(log_cmd)  
         example = ''' 
     access_log syslog:server={your_IP_Addr},facility=local7,tag=nginx,severity=info 
     combined; 
         '''
-        print("Remediation : \n To enable central logging for your access logs, add the below line to your server block in your server configuration file. 192.168.2.1 should be replaced with the location of your central log server. The local logging facility may be changed to any unconfigured facility on your server\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \n To enable central logging for your access logs, add the below line to your server block in your server configuration file. 192.168.2.1 should be replaced with the location of your central log server. The local logging facility may be changed to any unconfigured facility on your server\n" + example )       
   
 def proxies():
- print("[+] Ensure proxies pass source IP information  ")
+ print(f"{Fore.WHITE}[+] Ensure proxies pass source IP information  ")
  try:
     log_cmd = "grep -ir proxy_set_header /etc/nginx  "
     cmd = subprocess.check_output(log_cmd, shell=True).decode().strip()  
     pattern = r"(?<!#)\s*proxy_set_header\s+(X-Real-IP|X-Forwarded-For)\s+(\S+);"
     matches = re.findall(pattern, cmd)
     if matches:
-        print("[+] The proxies pass source IP information")
+        print(f"{Fore.GREEN}[+] The proxies pass source IP information")
         os.system(log_cmd)  
 
     else:
@@ -911,7 +914,7 @@ location / {
  }
 }
         '''
-        print("Remediation : \n To ensure your proxy or load balancer will forward information about the client and the proxy to the application, you must set the below headers in your location block. Edit your location block so it shows the proxy_set_header directives for the client and the proxy as shown below. These headers are the exact same and there is no need to have both present.\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \n To ensure your proxy or load balancer will forward information about the client and the proxy to the application, you must set the below headers in your location block. Edit your location block so it shows the proxy_set_header directives for the client and the proxy as shown below. These headers are the exact same and there is no need to have both present.\n" + example )       
  except subprocess.CalledProcessError :
         print(f"{Fore.RED}[-] Proxy directive does not exist")
         os.system(log_cmd)  
@@ -925,19 +928,19 @@ location / {
  }
 }
         '''
-        print("Remediation : \n To ensure your proxy or load balancer will forward information about the client and the proxy to the application, you must set the below headers in your location block. Edit your location block so it shows the proxy_set_header directives for the client and the proxy as shown below. These headers are the exact same and there is no need to have both present.\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \n To ensure your proxy or load balancer will forward information about the client and the proxy to the application, you must set the below headers in your location block. Edit your location block so it shows the proxy_set_header directives for the client and the proxy as shown below. These headers are the exact same and there is no need to have both present.\n" + example )       
 def check_redirect():
-    print("[+] Ensure HTTP is redirected to HTTPS ")
+    print(f"{Fore.WHITE}[+] Ensure HTTP is redirected to HTTPS ")
     url= input('Enter the HTTP version of your web server address : ') 
     response = requests.get(url)
 
     if response.history:
-        print("[+] Request was redirected")
+        print(f"{Fore.GREEN}[+] Request was redirected")
 
         for redirect in response.history:
             print(redirect.status_code, redirect.url)
 
-        print("[+] Final destination:")
+        print(f"{Fore.GREEN}[+] Final destination:")
         print(response.status_code, response.url)
     else:
         print(F"{Fore.RED}[-] Request was not redirected")
@@ -950,7 +953,7 @@ server {
 }
 
         '''
-        print("Remediation : \n Edit your web server or proxy configuration file to redirect all unencrypted listening ports, such as port 80, using a redirection through the return directive (cisecurity.org is used as an example server name).\n" + example )       
+        print(f"{Fore.WHITE}[+]Remediation : \n Edit your web server or proxy configuration file to redirect all unencrypted listening ports, such as port 80, using a redirection through the return directive (cisecurity.org is used as an example server name).\n" + example )       
 def trust_chain_key():
  print("[+] Ensure a trusted certificate and trust chain is installed  ")
  try:
@@ -964,12 +967,12 @@ def trust_chain_key():
     pattern1 = r"(?s)-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----"
     cert_pattern= re.findall(pattern1, cert_cmd)
     if matches and cert_pattern:
-        print("[+] A trusted certificate and trust chain is installed")
+        print(f"{Fore.GREEN}[+] A trusted certificate and trust chain is installed")
         os.system(log_cmd)  
 
     elif not cert_pattern:
         print(f"{Fore.RED}[-] The perm file in the configuration is empty ")
-        remediate = input("Do you want to insatll a certificate and its signing certificate chain ? (y/n) ")
+        remediate = input("Do you want to install a certificate and its signing certificate chain ? (y/n) ")
         if remediate.lower() == "y":
                cert_name = input('Enter the ssl certificate key name(nginx.key): ')     
                cert_bit = input(' Enter bit key stength (2048): ')    
@@ -986,9 +989,9 @@ server {
 
 
         '''
-               print(f"[+] After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example)
+               print(f"{Fore.WHITE}[+]Remediation:\n After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example)
         elif remediate.lower() == "n":
-               print(f"[-] Permissions are set with the ability to read and execute as other by default on directory file : drwxr-xr-x ")
+               print(f"{Fore.GREEN}[+] Permissions are set with the ability to read and execute as other by default on directory file : drwxr-xr-x ")
         os.system(log_cmd)  
     elif not (matches and cert_pattern):
        print(f"{Fore.RED}[-] The trusted certificate and trust chain is not installed and the perm file is empty ")
@@ -1009,7 +1012,7 @@ server {
 
 
         '''
-               print(f"[+] After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example)
+               print(f"{Fore.WHITE}[+]Remediation:\n After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example)
        elif remediate.lower() == "n":
                print(f"{Fore.RED}[-] Permissions are set with the ability to read and execute as other by default on directory file : drwxr-xr-x ")
                os.system(log_cmd)          
@@ -1032,14 +1035,14 @@ server {
 
 
         '''
-               print(f"[+] After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example)
+               print(f"{Fore.WHITE}[+]Remediation:\n After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example)
        elif remediate.lower() == "n":
                print(f"{Fore.RED}[-] Permissions are set with the ability to read and execute as other by default on directory file : drwxr-xr-x ")
                os.system(log_cmd)       
  except subprocess.CalledProcessError :
-        print("[-]  A trusted certificate and trust chain does not exist")
+        print(f"{Fore.RED}[-] A trusted certificate and trust chain does not exist")
 def private_key_perm():
-  print("[+] Ensure private key permissions are restricted  ")
+  print(f"{Fore.WHITE}[+] Ensure private key permissions are restricted  ")
   grep_command3 = "sudo find /etc/nginx/ -name '*.key' -exec stat -Lc ' %a' {} + "
   try:
         # Check if any .key files exist
@@ -1058,10 +1061,10 @@ def private_key_perm():
                 os.system(grep_command)
                 print(f"[+] Permissions of the private key file is set to 400 or below")
            elif remediate.lower() == "n":
-                print(f"{Fore.RED}[-] Permissions of the private key file is not set to 400 or below ")
+                print(f"{Fore.GREEN}[+] Permissions of the private key file is not set to 400 or below ")
  
         else:
-               print(f"[-] Private key file  permissions are restricted")
+               print(f"{Fore.GREEN}[+] Private key file  permissions are restricted")
                grep_command3 = "sudo find /etc/nginx/ -name '*.key' -exec stat -Lc ' %a' {} +"
                os.system(grep_command3)                                    
   except subprocess.CalledProcessError :
@@ -1069,7 +1072,7 @@ def private_key_perm():
                grep_command3 = "sudo find /etc/nginx/ -name '*.key' -exec stat -Lc ' %a' {} + "
                os.system(grep_command3)   
 def TLS():
- print("[+] Ensure only modern TLS protocols are used  ")
+ print(f"{Fore.WHITE}[-] Ensure only modern TLS protocols are used  ")
  try:
 # Define regex pattern to match SSL protocols
     find_command = "grep -ir ssl_protocol /etc/nginx"
@@ -1081,12 +1084,12 @@ def TLS():
 # Find all matches of the pattern in the configuration file
     matches = re.findall(pattern, config)
     if matches :
-        print("[+] Only modern TLS protocols are used ")
+        print(f"{Fore.GREEN}[+] Only modern TLS protocols are used ")
         os.system(find_command)  
 
     elif not matches:
         print(f"{Fore.RED}[-] Older TLS protocols are being used ")
-        remediate = input("Do you change SSL protocols configurations (y/n) ")
+        remediate = input("Do you want to change SSL protocols configurations (y/n) ")
         if remediate.lower() == "y":
                type = input('Web Server or Proxy? (web/proxy): ')     
                if type.lower() == "web":
@@ -1095,15 +1098,15 @@ def TLS():
                elif type.lower() == "proxy":
                   grep_command = "sed -i 's/proxy_ssl_protocols[^;]*;/proxy_ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf"
                   os.system(grep_command)
-               print(f"[+] After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example)
+               print(f"{Fore.WHITE}[+]Remediation: After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example)
         elif remediate.lower() == "n":
-               print(f"{Fore.RED}[-]  SSL protocols configurations  are not changed ")
+               print(f"{Fore.RED}[-] SSL protocols configurations  are not changed ")
 
        
  except subprocess.CalledProcessError :
-        print("[-] The SSL protocol directive does not exist")
+        print(f"{Fore.RED}[+] The SSL protocol directive does not exist")
 def weak_ciphers():
- print("[+] Disable weak ciphers ")
+ print(f"{Fore.WHITE}[-] Disable weak ciphers ")
     # Search for ssl_ciphers and proxy_ssl_ciphers in /etc/nginx directory
  result = subprocess.run(["grep", "-ir", "ssl_ciphers\|proxy_ssl_ciphers", "/etc/nginx/"], stdout=subprocess.PIPE)
  output = result.stdout.decode()
@@ -1130,13 +1133,14 @@ location / {
 }
 
         '''
-            print(f"[+] Remediation:\n After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example +"\n" +example1)
+            print(f"{Fore.WHITE}[+] Remediation:\n After creating the server's private key and a certificate signing request , obtain a signed certificate from your certificate authority and install the certificate and signing certificate chain on your web server and restart nginx by using the following example.\n " + example +"\n" +example1)
     else:
             print(f"{Fore.RED}[-] Cipher string found in nginx config file.")
  else:
         print(f"{Fore.RED}[-] Cipher string not found in nginx config file.")
  
 def ssl_dhparam():
+  print(f"{Fore.WHITE}[+]Check whether ssl_dhparam parameter is set  ")
  try:
     # Define regex pattern to match SSL protocols
     find_command = "grep ssl_dhparam /etc/nginx/nginx.conf"
@@ -1149,13 +1153,13 @@ def ssl_dhparam():
     match = re.findall(regex, config)
 
     if match:
-        print("[+] ssl_dhparam is present in the nginx config file")
+        print(f"{Fore.GREEN}[+]ssl_dhparam is present in the nginx config file")
         print(config)
     elif not match:
-        print("[+] ssl_dhparam is commented out")
+        print(f"{Fore.RED}[-]ssl_dhparam is commented out")
         print(config)       
     else:
-        print("[+] ssl_dhparam is present and the path to the file is")
+        print(f"{Fore.GREEN}[+] ssl_dhparam is present in the file")
  except subprocess.CalledProcessError:
         print(f"{Fore.RED}[-] ssl_dhparam is not present in the config file")
         remediate = input(" Want to generate strong DHE (Ephemeral Diffie-Hellman) parameters(y/n) ")
@@ -1173,7 +1177,7 @@ def ssl_dhparam():
  }
 }
                   '''
-                  print("Alter the  server configuration to use the new parameters by doing the following:\n" + example)   
+                  print(f"{Fore.WHITE}[+]Remdiation:\nAlter the  server configuration to use the new parameters by doing the following:\n" + example)   
         elif remediate.lower() == "n":
                 print(f"{Fore.RED}[-]  Configurations for ssl_dhparam are not being changed ")
 
@@ -1187,11 +1191,11 @@ def crlf_injections(url):
         print(f"{Fore.RED}[-] CRLF injection vulnerability found as configuration in this web server uses $uri or $document_uri instead of $request_uri:", payload)
         print("Remediation: Check your configurations files for $uri or $document_uri and remove those lines or use the $request_uri instead" )
     else:
-        print(f"[-] No CRLF injection vulnerability with payload:", payload)
+        print(f"{Fore.GREEN}[+]No CRLF injection vulnerability with payload:", payload)
         print(crlf_req)
         
 def OCSP():
- print("[+]  Ensure Online Certificate Status Protocol (OCSP) stapling is enabled")
+ print(f"{Fore.WHITE}[+]Ensure Online Certificate Status Protocol (OCSP) stapling is enabled")
  try:
     ocsp_cmd = "grep -ir ssl_stapling /etc/nginx "
     cmd = subprocess.check_output(ocsp_cmd, shell=True).decode().strip()
@@ -1206,9 +1210,9 @@ server {
  ssl_stapling_verify on;
 }
         '''
-        print("Remediation : \nEnsure your NGINX server has access to your CA's OCSP server and enable it on nginx by doing the following:\n" + example )     
+        print(f"{Fore.WHITE}[]Remediation : \nEnsure your NGINX server has access to your CA's OCSP server and enable it on nginx by doing the following:\n" + example )     
     else:
-        print("[+] OCSP is enabled")
+        print(f"{Fore.GREEN}[+] OCSP is enabled")
         os.system(ocsp_cmd)    
  except subprocess.CalledProcessError :
         print(f"{Fore.RED}[-] OCSP does not exist")
@@ -1219,32 +1223,32 @@ server {
  ssl_stapling_verify on;
 }
         '''
-        print("Remediation : \nEnsure your NGINX server has access to your CA's OCSP server and enable it on nginx by doing the following:\n" + example )     
+        print(f"{Fore.WHITE}[+]Remediation : \nEnsure your NGINX server has access to your CA's OCSP server and enable it on nginx by doing the following:\n" + example )     
 def HSTS():
-   print("[+] Ensure  HTTP Strict Transport Security (HSTS) is enabled and the domain is preloaded  ")
+   print(f"{Fore.WHITE}[+]Ensure  HTTP Strict Transport Security (HSTS) is enabled and the domain is preloaded  ")
    # Look for the Strict-Transport-Security header in all Nginx config files
    cmd_output = os.popen("grep -ir 'Strict-Transport-Security' /etc/nginx").read()
 
     # Check if the expected header is found
    if 'add_header Strict-Transport-Security "max-age=15768000;" always;' in cmd_output:
-        print("[+] The Strict-Transport-Security header with the appropriate max-age value is set.")
+        print(f"{Fore.GREEN}[+] The Strict-Transport-Security header with the appropriate max-age value is set.")
    else:
-        print("[-] The Strict-Transport-Security header with the appropriate max-age value is not set.")
-        print("Remediation:Add the header in nginx config file in this way:\nadd_header Strict-Transport-Security ' maxage=31536000; includeSubDomains;' preload;")
+        print(f"{Fore.RED}[-] The Strict-Transport-Security header with the appropriate max-age value is not set.")
+        print(f"{Fore.WHITE}[+]Remediation:Add the header in nginx config file in this way:\nadd_header Strict-Transport-Security ' maxage=31536000; includeSubDomains;' preload;")
 def proxy_ssl():
- print("[+] Ensure upstream server traffic is authenticated with a client certificate  ")
+ print(f"{Fore.WHITE}[+] Ensure upstream server traffic is authenticated with a client certificate  ")
  try:
     cert_cmd = " grep -ir proxy_ssl_certificate /etc/nginx | grep -E '^[^#]*proxy_ssl_certificate\s+\/etc\/nginx\/ssl\/nginx\.pem;'"
     cert_cmd1 = " grep -ir proxy_ssl_certificate /etc/nginx | grep -E '^[^#]*proxy_ssl_certificate_key\s+\/etc\/nginx\/ssl\/nginx\.key;'"
     cmd = subprocess.check_output(cert_cmd, shell=True).decode().strip()  
     cmd1 = subprocess.check_output(cert_cmd1, shell=True).decode().strip()  
     if cmd and cmd1:
-        print("[+] The client certificate validation directive is set successfully")
+        print(f"{Fore.GREEN}[+]The client certificate validation directive is set successfully")
         os.system(cert_cmd)  
         os.system(cert_cmd1)  
 
     elif not (cmd and cmd1):
-        print("[-] The client certificate validation directive is set successfully ")
+        print(f"{Fore.RED}[-]The client certificate validation directive is not set successfully ")
         os.system(cert_cmd) 
         os.system(cert_cmd1) 
         example = ''' 
@@ -1252,11 +1256,11 @@ proxy_ssl_certificate /etc/nginx/ssl/nginx.pem;
 proxy_ssl_certificate_key /etc/nginx/ssl/nginx.key;
 
         '''
-        print("Remediation : \nCreate a client certificate to be authenticated against and have it signed. Once you have a signed certificate, place the certificate in a location of your choice. In the below example, we use /etc/nginx/ssl/cert.pem. Implement the configuration as part of the location block:\n" + example )      
+        print(f"{Fore.WHITE}[+]Remediation : \nCreate a client certificate to be authenticated against and have it signed. Once you have a signed certificate, place the certificate in a location of your choice. In the below example, we use /etc/nginx/ssl/cert.pem. Implement the configuration as part of the location block:\n" + example )      
  except subprocess.CalledProcessError :
-        print("[-]  Both client certificate validation directives or one of the directive does not exist")
+        print(f"{Fore.RED}[-]Both client certificate validation directives or one of the directive does not exist")
 def trusted_cert():
- print("[+]   Ensure the upstream traffic server certificate is trusted ")
+ print(f"{Fore.WHITE}[+]Ensure the upstream traffic server certificate is trusted ")
  try:
     cert_cmd = "  grep -irE '^[^#]*proxy_ssl_trusted_certificate\s+/etc/nginx/trusted_ca_cert.crt;' /etc/nginx"
     cert_cmd1 = " grep -irE '^[^#]*proxy_ssl_verify\s+on;' /etc/nginx"
@@ -1268,7 +1272,7 @@ def trusted_cert():
         os.system(cert_cmd1)  
 
     elif not (cmd and cmd1):
-        print("[-] The upstream traffic server certificate is not trusted and implemented")
+        print(f"{Fore.RED}[-]The upstream traffic server certificate is not trusted and implemented")
         os.system(cert_cmd) 
         os.system(cert_cmd1) 
         example = ''' 
@@ -1276,38 +1280,38 @@ proxy_ssl_trusted_certificate /etc/nginx/trusted_ca_cert.crt;
 proxy_ssl_verify on;
 
         '''
-        print("Remediation : \nObtain the full certificate chain of the upstream server in .pem format. Then reference that file in the location block as part of the proxy_ssl_trusted_certificate directive. Implement the proxy_ssl_trusted_certificate and proxy_ssl_verify directives as shown below as part of the location block you are using to send traffic to your upstream server.:\n" + example )      
+        print(f"{Fore.WHITE}[+]Remediation : \nObtain the full certificate chain of the upstream server in .pem format. Then reference that file in the location block as part of the proxy_ssl_trusted_certificate directive. Implement the proxy_ssl_trusted_certificate and proxy_ssl_verify directives as shown below as part of the location block you are using to send traffic to your upstream server.:\n" + example )      
  except subprocess.CalledProcessError :
-        print("[-] The proxy_ssl_trusted_certificate or proxy_ssl_verify directive does not exist or both does not exist ")
+        print(f"{Fore.RED}[-]The proxy_ssl_trusted_certificate or proxy_ssl_verify directive does not exist or both does not exist ")
         os.system(cert_cmd) 
         os.system(cert_cmd1) 
 def session_tickets():
- print("[+] Ensure session resumption is disabled to enable perfect forward security ")
+ print(f"{Fore.WHITE}[+] Ensure session resumption is disabled to enable perfect forward security ")
  try:
     ssl_cmd = "grep -ir ssl_session_tickets /etc/nginx "
     cmd = subprocess.check_output(ssl_cmd, shell=True).decode().strip()
     ssl = re.findall(r"(off|OFF)", cmd, re.IGNORECASE)
 
     if not ssl:
-        print("[-] Session resumption is disabled ")
+        print(f"{Fore.RED}[-] Session resumption is disabled ")
         os.system(ssl_cmd)  
         example = ''' 
 ssl_session_tickets off;
 
         '''
-        print("Remediation : \nEnsure your NGINX server has access to your CA's OCSP server and enable it on nginx by doing the following:\n" + example )     
+        print(f"{Fore.WHITE}[+]Remediation : \nEnsure your NGINX server has access to your CA's OCSP server and enable it on nginx by doing the following:\n" + example )     
     else:
-        print("[+] Session resumption is enabled")
+        print(f"{Fore.GREEN}[+] Session resumption is enabled")
         os.system(ssl_cmd)    
  except subprocess.CalledProcessError :
-        print("[-] Session resumption does not exist")
+        print(f"{Fore.RED}[-] Session resumption does not exist")
         os.system(ssl_cmd)  
         example = ''' 
 ssl_session_tickets off;
         '''
-        print("Remediation : \n Turn off the ssl_session_tickets directive as part of any server block in your nginx configuration:\n" + example )     
+        print(f"{Fore.WHITE}[+]Remediation : \n Turn off the ssl_session_tickets directive as part of any server block in your nginx configuration:\n" + example )     
 def http2():
- print("[+] Ensure HTTP/2.0 is used ")
+ print(f"{Fore.WHITE}[+]Ensure HTTP/2.0 is used ")
  try:
     http2_cmd = "grep -ir '^[^#]*http2' /etc/nginx "
     cmd = subprocess.check_output(http2_cmd, shell=True).decode().strip()
@@ -1323,22 +1327,22 @@ server {
 
         '''
     else:
-        print("[+]  HTTP/2.0 is not used")
+        print(f"{Fore.RED}[-]HTTP/2.0 is not used")
         os.system(http2_cmd)  
-        print("Remediation : Open the nginx server configuration file (or vhosts file based on your configurations) and configure all listening ports with http2, similar to that of this :\n" + example)
+        print(f"{Fore.WHITE}[+]Remediation : Open the nginx server configuration file (or vhosts file based on your configurations) and configure all listening ports with http2, similar to that of this :\n" + example)
 
  except subprocess.CalledProcessError :
-        print("[-] HTTP/2.0 directive does not exists")
+        print(f"{Fore.RED}[-] HTTP/2.0 directive does not exists")
         os.system(http2_cmd)  
         example = ''' 
 server {
  listen 443 ssl http2;
 }
         '''
-        print("Remediation : Open the nginx server configuration file (or vhosts file based on your configurations) and configure all listening ports with http2, similar to that of this example:\n" + example)
+        print(f"{Fore.WHITE}[+]Remediation : Open the nginx server configuration file (or vhosts file based on your configurations) and configure all listening ports with http2, similar to that of this example:\n" + example)
 
 def ciphers():
- print("[+] Ensure only Perfect Forward Secrecy Ciphers are Leveraged ")
+ print(f"{Fore.WHITE}[+]Ensure only Perfect Forward Secrecy Ciphers are Leveraged ")
     # Search for ssl_ciphers and proxy_ssl_ciphers in /etc/nginx directory
  result = subprocess.run(["grep", "-ir", "ssl_ciphers\|proxy_ssl_ciphers", "/etc/nginx/"], stdout=subprocess.PIPE)
  output = result.stdout.decode()
@@ -1349,7 +1353,7 @@ def ciphers():
         # Check if the cipher string is commented or not
     regex_commented = re.compile(r'^\s*#\s*(ssl_ciphers|proxy_ssl_ciphers)\s.*$|^(\s*ssl_ciphers|proxy_ssl_ciphers)\s.*')
     if regex_commented.search(output):
-            print("[-] Cipher string found in nginx config file, but it is commented.")
+            print(f"{Fore.RED}[-] Cipher string found in nginx config file, but it is commented.")
             example = ''' 
 
 ssl_ciphers EECDH:EDH:!NULL:!SSLv2:!RC4:!aNULL:!3DES:!IDEA;
@@ -1359,13 +1363,13 @@ ssl_ciphers EECDH:EDH:!NULL:!SSLv2:!RC4:!aNULL:!3DES:!IDEA;
 proxy_ssl_ciphers EECDH:EDH:!NULL:!SSLv2:!RC4:!aNULL:!3DES:!IDEA;
 
         '''
-            print(f"[+] Remediation:\n Ensure that only ciphers that are compatible with perfect forward secrecy are used. ECDHE/EECDH ciphers and DHE/EDH ciphers support this capability by doing the following:\n " + example +"\n" +example1)
+            print(f"{Fore.WHITE}[+] Remediation:\n Ensure that only ciphers that are compatible with perfect forward secrecy are used. ECDHE/EECDH ciphers and DHE/EDH ciphers support this capability by doing the following:\n " + example +"\n" +example1)
     else:
-            print("[+] Cipher string found in nginx config file.")
+            print(f"{Fore.GREEN}[+] Cipher string found in nginx config file.")
  else:
-        print("[-] Cipher string not found in nginx config file.")
+        print(f"{Fore.RED}[-] Cipher string not found in nginx config file.")
 def approved_HTTP():
- print("[+] Check for unapproved HTTP methods ")
+ print(f"{Fore.WHITE}[-] Check for unapproved HTTP methods ")
  open_methods = []
  for method in ['OPTIONS', 'TRACE', 'CONNECT','DELETE']:
     response = requests.request(method, url,allow_redirects=False)
@@ -1382,11 +1386,11 @@ if ($request_method !~ ^(GET|HEAD|POST)$) {
         '''
     
     print(f"{Fore.RED}[-] Open HTTP methods detected: ", ", ".join(open_methods))
-    print(f"[+] Remediation:\n Add the following into a server or location block in your nginx.conf\n " +example1)   
+    print(f"{Fore.WHITE}[+]Remediation:\n Add the following into a server or location block in your nginx.conf\n " +example1)   
  else:
     print(f"{Fore.RED}[-] No HTTP methods detected: ", ", ".join(open_methods))  
 def ciphers():
- print("[+] Ensure only Perfect Forward Secrecy Ciphers are Leveraged ")
+ print(f"{Fore.WHITE}[+] Ensure only Perfect Forward Secrecy Ciphers are Leveraged ")
     # Search for ssl_ciphers and proxy_ssl_ciphers in /etc/nginx directory
  result = subprocess.run(["grep", "-ir", "ssl_ciphers\|proxy_ssl_ciphers", "/etc/nginx/"], stdout=subprocess.PIPE)
  output = result.stdout.decode()
@@ -1397,7 +1401,7 @@ def ciphers():
         # Check if the cipher string is commented or not
     regex_commented = re.compile(r'^\s*#\s*(ssl_ciphers|proxy_ssl_ciphers)\s.*$|^(\s*ssl_ciphers|proxy_ssl_ciphers)\s.*')
     if regex_commented.search(output):
-            print("[-] Cipher string found in nginx config file, but it is commented.")
+            print(f"{Fore.RED}[-] Cipher string found in nginx config file, but it is commented.")
             example = ''' 
 
 ssl_ciphers EECDH:EDH:!NULL:!SSLv2:!RC4:!aNULL:!3DES:!IDEA;
@@ -1407,32 +1411,32 @@ ssl_ciphers EECDH:EDH:!NULL:!SSLv2:!RC4:!aNULL:!3DES:!IDEA;
 proxy_ssl_ciphers EECDH:EDH:!NULL:!SSLv2:!RC4:!aNULL:!3DES:!IDEA;
 
         '''
-            print(f"[+] Remediation:\n Ensure that only ciphers that are compatible with perfect forward secrecy are used. ECDHE/EECDH ciphers and DHE/EDH ciphers support this capability by doing the following:\n " + example +"\n" +example1)
+            print(f"{Fore.WHITE}[+] Remediation:\n Ensure that only ciphers that are compatible with perfect forward secrecy are used. ECDHE/EECDH ciphers and DHE/EDH ciphers support this capability by doing the following:\n " + example +"\n" +example1)
     else:
-            print("[+] Cipher string found in nginx config file.")
+            print(f"{Fore.GREEN}[+] Cipher string found in nginx config file.")
  else:
         print(f"{Fore.RED}[-] Cipher string not found in nginx config file.")
              
 def timeout_values():
- print("[+] Check for request limits controls ")    
+ print(f"{Fore.WHITE}[+] Check for request limits controls ")    
  try:
    output = subprocess.check_output(['grep', '-ir', '-E' , 'client_body_timeout|client_header_timeout', '/etc/nginx']).decode('utf-8')
  
    if " client_body_timeout 10;" in output and " client_header_timeout 10;" in output:
      if "#" not in output:
 
-        print(f"[+]  Both client_body_timeout and client_header_timeout are configured and uncommented.")
+        print(f"{Fore.GREEN}[+] Both client_body_timeout and client_header_timeout are configured and uncommented.")
   
      else:
         
-        print(f"[-] Both client_body_timeout and client_header_timeout are configured but at least one is commented. .")
+        print(f"{Fore.RED}[-] Both client_body_timeout and client_header_timeout are configured but at least one is commented. .")
         example = ''' 
 
 client_body_timeout 10;
 client_header_timeout 10;
 
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration and add the client_header_timeout and client_body_timeout  directive set to the configuration. :\n" + example )            
+        print("f{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and add the client_header_timeout and client_body_timeout  directive set to the configuration. :\n" + example )            
  except subprocess.CalledProcessError :
     print("[-]  Either client_body_timeout or client_header_timeout is not configured.")
     example = ''' 
@@ -1440,14 +1444,14 @@ client_body_timeout 10;
 client_header_timeout 10;
 
         '''
-    print("Remediation : \nFind the HTTP or server block of your nginx configuration and add the client_header_timeout and client_body_timeout  directive set to the configuration. : :\n" + example )                      
+    print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and add the client_header_timeout and client_body_timeout  directive set to the configuration. : :\n" + example )                      
  try:
    output1 = subprocess.check_output(['grep', '-ir', 'client_max_body_size', '/etc/nginx']).decode('utf-8')
  
    if " client_max_body_size 100K;" in output1 :
      if "#" not in output1:
 
-        print(f"[+] Client_max_body_size is configured and uncommented.")
+        print(f"{Fore.GREEN}[+] Client_max_body_size is configured and uncommented.")
   
      else:
         
@@ -1463,31 +1467,31 @@ client_max_body_size 100K;
 client_max_body_size 100K;
 
         '''
-    print("Remediation : \nFind the HTTP or server block of your nginx configuration and add the client_max_body_size directive set to the configuration. :\n" + example )                
+    print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and add the client_max_body_size directive set to the configuration. :\n" + example )                
  try:
   output2 = subprocess.check_output(['grep', '-ir', 'large_client_header_buffers', '/etc/nginx']).decode('utf-8')
 
   if "large_client_header_buffers 2 1k;" in output2 :
     if "#" not in output2:
 
-        print(f"[+]large_client_header_buffers  is configured and uncommented.")
+        print(f"{Fore.GREEN}[+]large_client_header_buffers  is configured and uncommented.")
         example = ''' 
 large_client_header_buffers 2 1k;
 
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration and add the large_client_header_buffers  directive set to the configuration. :\n" + example )            
+        print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and add the large_client_header_buffers  directive set to the configuration. :\n" + example )            
     else:
         
-        print("[-] large_client_header_buffers is configured but at least one is commented.")
+        print(f"{Fore.RED}[-] large_client_header_buffers is configured but at least one is commented.")
  except subprocess.CalledProcessError :
     print(f"{Fore.RED}[-] large_client_header_buffers  is not configured.")
     example = ''' 
 large_client_header_buffers 2 1k;
 
         '''
-    print("Remediation : \nFind the HTTP or server block of your nginx configuration and add the large_client_header_buffers  directive set to the configuration. :\n" + example )                
+    print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and add the large_client_header_buffers  directive set to the configuration. :\n" + example )                
 def ip_ratelimit():
- print("[+] Search for limit_conn_zone and limit_conn directives and check whether exist to limit simultaneous connections from one IP Address and the number of requests an IP address may make to a server in a given period of time")
+ print(f"{Fore.WHITE}[+] Search for limit_conn_zone and limit_conn directives and check whether exist to limit simultaneous connections from one IP Address and the number of requests an IP address may make to a server in a given period of time")
  config_files = ['/etc/nginx/nginx.conf', '/etc/nginx/']
 
 # Search for limit_conn_zone and limit_conn directives
@@ -1532,9 +1536,9 @@ http {
 }
 
         '''
-    print("Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example + "\n" +example1)                
+    print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example + "\n" +example1)                
 def http_headers():
- print("[+] Check HTTP headers to see whether they are configured correctly")
+ print(f"{Fore.WHITE}[+] Check HTTP headers to see whether they are configured correctly")
 # Check for X-Frame-Options header
 
 # Check if there is any output
@@ -1545,7 +1549,7 @@ def http_headers():
     # Check if the line is not commented out
     if not output.startswith('#'):
         if "'SAMEORIGIN'" in output or '"SAMEORIGN"' in output:
-            print(f"[+] X-Frame-Options header is configured and enabled.")
+            print(f"{Fore.GREEN}[+] X-Frame-Options header is configured and enabled.")
         else:
             print(f"{Fore.RED}[-] X-Frame-Options is not configured properly.")
 
@@ -1554,7 +1558,7 @@ add_header X-Frame-Options "SAMEORIGIN" always;
 
 
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
+        print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
    
     else:
     
@@ -1566,7 +1570,7 @@ add_header X-Frame-Options "SAMEORIGIN" always;
 
 
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
+        print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
 # Check for X-Content-Type-Options header
 
 # Check if there is any output
@@ -1577,7 +1581,7 @@ add_header X-Frame-Options "SAMEORIGIN" always;
     # Check if the line is not commented out
     if not output1.startswith('#'):
         if "'nosniff'" in output or '"nosniff"' in output1:
-            print(f"[+] X-Content-Type-Options header is configured and enabled.")
+            print(f"{Fore.GREEN}[+]X-Content-Type-Options header is configured and enabled.")
         else:
             print(f"{Fore.RED}[-] X-Content-Type-Options header is not configured properly.")
             example1= ''' 
@@ -1585,10 +1589,10 @@ add_header X-Content-Type-Options "nosniff" always;
 
 
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
+        print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
         
  except subprocess.CalledProcessError :
-    print(" X-Content-Type-Options header  is not configured and not enabled.")
+    print(f"{Fore.WHITE}[+] X-Content-Type-Options header  is not configured and not enabled.")
 
  try:
    cmd1= "grep -ir Content-Security-Policy /etc/nginx"
@@ -1598,7 +1602,7 @@ add_header X-Content-Type-Options "nosniff" always;
     # Check if the line is not commented out and is properly configured
     if not output2.startswith('#'):
         if "default-src 'self'" in output2:
-            print(f"[+] Content Security Policy (CSP) is enabled and configured properly.")
+            print(f"{Fore.GREEN}[+] Content Security Policy (CSP) is enabled and configured properly.")
         else:
             print(f"{Fore.RED}[-] Content Security Policy (CSP) is not configured properly.")
             example1= ''' 
@@ -1606,7 +1610,7 @@ add_header X-Content-Type-Options "nosniff" always;
 
 
         '''
-        print("Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
+        print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
  except subprocess.CalledProcessError :
     print(f"{Fore.RED}[-] Content Security Policy (CSP) is not configured and not enabled.")
     example1= ''' 
@@ -1614,7 +1618,7 @@ add_header X-Content-Type-Options "nosniff" always;
 
 
         '''
-    print("Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
+    print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
 
 # Check if there is any output
  try:
@@ -1632,7 +1636,7 @@ add_header X-Content-Type-Options "nosniff" always;
 
 
         '''
-    print("Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                           
+    print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                           
  except subprocess.CalledProcessError : 
     print(f"{Fore.RED}[-] Referrer Policy is not configured and not enabled.")
     example1= ''' 
@@ -1640,9 +1644,9 @@ add_header X-Content-Type-Options "nosniff" always;
 
 
         '''
-    print("Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
+    print(f"{Fore.WHITE}[+]Remediation : \nFind the HTTP or server block of your nginx configuration and change the configurations to the following :\n" + example1)                
 def check_open_ports(url):
-    print("[+] Check whether vulnerable ports are open")
+    print(f"{Fore.WHITE}[+]Check whether vulnerable ports are open")
     open_ports = []
     for port in [21, 22, 23, 25,53, 137,445]:
         try:
@@ -1654,9 +1658,9 @@ def check_open_ports(url):
     if len(open_ports) > 0:
         print(f"{Fore.RED}[-] Warning: Open ports detected: {open_ports}")
     else:
-        print("[+] No open ports detected")
+        print(f"{Fore.WHITE}[+] No open ports detected")
 def check_session_fixation(url):
-    print("[+] Check for secure and HttpOnly flags")
+    print(f"{Fore.WHITE}[+] Check for secure and HttpOnly flags")
     # Generate a random cookie value and set it in the session
     session = requests.Session()
     cookie_name = str(uuid.uuid4())
@@ -1671,7 +1675,7 @@ def check_session_fixation(url):
     secure_flag = 'secure' in session_cookie
     http_only_flag = 'HttpOnly' in session_cookie
     if secure_flag and http_only_flag:
-        print('[+] Session cookie has secure and HttpOnly flags')
+        print(f"{Fore.GREEN}[+] Session cookie has secure and HttpOnly flags')
     else:
         print(f'{Fore.RED}[-] Session cookie does not have secure and/or HttpOnly flags')
 
@@ -1684,24 +1688,24 @@ def check_session_fixation(url):
         print(f'{Fore.RED}[-] Session fixation vulnerability detected - server-generated SID was accepted')
         print(attack_response.status_code)
     else:
-        print('[+] Server only accepts newly generated SIDs - not vulnerable to session fixation attack')
+        print(f"{Fore.WHITE}[-] Server only accepts newly generated SIDs - not vulnerable to session fixation attack')
 def check_cors_vuln(url):
-    print("[+] Check for CORS vulnerabiltites" )
+    print(f"{Fore.WHITE}[+] Check for CORS vulnerabiltites" )
     # Send a request with an origin header to test CORS configuration
     headers = {'Origin': 'https://malicious-site.com'}
     response = requests.get(url, headers=headers,allow_redirects=False)
 
     # Check for Access-Control-Allow-Origin header
     if 'access-control-allow-origin' not in response.headers:
-        print('[+] Missing Access-Control-Allow-Origin header!')
+        print(f"{Fore.GREEN}[+] Missing Access-Control-Allow-Origin header!')
     else:
         allowed_origin = response.headers['access-control-allow-origin']
         if allowed_origin == '*':
-            print('[+] CORS misconfiguration: Allow-Origin set to wildcard (*)')
+            print(f"{Fore.RED}[-] CORS misconfiguration: Allow-Origin set to wildcard (*)')
         elif 'https://malicious-site.com' not in allowed_origin:
             print(f'{Fore.RED}[-] CORS misconfiguration: Allow-Origin does not include malicious site')
         else:
-            print(f'{Fore.RED}[-] CORS is configured correctly.')
+            print(f"{Fore.GREEN}[+]CORS is configured correctly.')
 
 if __name__ == '__main__':
   banner = '''
