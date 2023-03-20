@@ -8,8 +8,6 @@ WebAuditor is a suite of Audit tools to analyze the configurations of Apache Tom
 2. beautifulsoup4
 3. colorama
 
-## Steps
-
 ## Install:
 
 ```
@@ -28,6 +26,7 @@ This guide provides step-by-step instructions on how to set permanent environmen
 ## Prerequisites
 1. Ubuntu operating system
 2. Nano text editor
+
 ## Steps
 Open the /etc/environment file using the Nano text editor:
 - sudo nano /etc/environment
@@ -50,8 +49,6 @@ To verify that the environment variables have been set correctly, you can run th
 ```
 ## Configurations to run the audit tool for NGINX web server
 ```
-## Usage:
-
-```
+## Steps to run the tool
+sudo -i
 python3 nginxtraktor.py https://example.com (your_web_server_url)
-```
