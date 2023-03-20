@@ -47,7 +47,7 @@ reload
 To verify that the environment variables have been set correctly, you can run the following commands:
 - echo $CATALINA_HOME
 - echo $CATALINA_BASE
-
+```
 ## Configurations to run the audit tool for NGINX web server
 ```
 ## Usage:
