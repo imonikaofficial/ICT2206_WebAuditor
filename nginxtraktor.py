@@ -16,7 +16,7 @@ import string
 import uuid
 
 def check_nginx_installed():
-    print (f"{Fore.WHITE}[+] Check the nginx version installed currently")
+    print (f"{Fore.WHITE}[+] Check the nginx version installed currently from the packages")
     # run the nginx -v command and use grep to extract the version number
     grep_command = "nginx -v 2>&1 | grep -Po '(?<=nginx/)[0-9]+.[0-9]+.[0-9]+'"
     nginx_version = subprocess.check_output(grep_command, shell=True).decode().strip()
@@ -54,7 +54,7 @@ def check_nginx_installed():
         print(f"{Fore.RED}[-] Unable to determine nginx version")
 
 def installed_from_source():
-    print(f"{Fore.WHITE} Check if nginx is installed from source")
+    print(f"{Fore.WHITE} Check if nginx is installed from source ( reccomended to only install from source)")
     grep_command = "nginx -v 2>&1 | grep -Po '(?<=nginx/)[0-9]+.[0-9]+.[0-9]+'"
     installed_from_source = subprocess.check_output(grep_command, shell=True).decode().strip()
     if installed_from_source:
@@ -83,7 +83,7 @@ def installed_from_source():
                 os.system(tar_command)
                 cd_command = f"cd nginx-{latest_version}"
                 os.system(cd_command)
-                modules = input("Add the modules u want to implement in the web server: ")
+                modules = input("Add the modules you want to implement in the web server: ")
                 configure_command = f"./configure {modules}"
                 os.system(configure_command)
                 make_command = "make"
@@ -108,6 +108,13 @@ def check_url_directory_listing(url):
     response = requests.get(url,allow_redirects=False)
     if "Index of" in response.text:
         print(f"{Fore.RED}[-] Directory listing enabled")
+        example = ''' 
+         egrep -i '^\s*autoindex\s+' /etc/nginx/nginx.conf
+         egrep -i '^\s*autoindex\s+' /etc/nginx/conf.d/*
+        '''
+        print(f"{Fore.WHITE}[+]Remediation :\n 1. Search the NGINX configuration files (nginx.conf and any included configuration files) to find autoindex directives:\n" + example +"\n2. Set the value for all autoindex directives to off, or remove those directives.")
+
+
     else:
         print(f"{Fore.GREEN}[+] Directory listing disabled")
     
@@ -118,6 +125,7 @@ def audit_http_dav_module():
     output = subprocess.check_output(command, shell=True).decode(sys.stdout.encoding).strip()
     if output:
         print(f'{Fore.RED}[-] http_dav_module is installed')
+        print(f"{Fore.WHITE}[+] Remediation : \nTo remove the http_dav_module, recompile nginx from source without the --with http_dav_module flag.")
     else:
         print(f'{Fore.GREEN} http_dav_module is not installed')
 
@@ -128,6 +136,8 @@ def audit_gzip_modules():
     output = subprocess.check_output(command, shell=True).decode(sys.stdout.encoding).strip()
     if output:
         print(f'{Fore.RED}[-] gzip modules are installed')
+        print(f"{Fore.WHITE}[+]Remediation :In order to disable the http_gzip_module and the http_gzip_static_module, NGINX must be recompiled from source. This can be accomplished using the below command in the folder you used during your original compilation. This must be done without the --with http_gzip_static_module or --with-http_gzip_module configuration directives. Do the following:\n"  )
+
     else:
         print(f'{Fore.GREEN} gzip modules are not installed')    
 def account_security():
@@ -366,7 +376,14 @@ def core_dump():
     else:
         print(f"{Fore.GREEN}[+] The working_directory configuration is secure.")
   else:
-    print(f"{Fore.RED}[-] The working_directory directive is not configured in nginx.conf.")                
+    print(f"{Fore.RED}[-] The working_directory directive is not configured in nginx.conf.")   
+    example = ''' 
+  chown root:nginx /var/log/nginx 
+        '''
+    example1 = ''' 
+chmod o-rwx /var/log/nginx 
+        '''        
+    print(f"{Fore.WHITE}[+]Remediation : Either remove the working_directory directive from the NGINX configuration files or do the following:\n" + example +"\n" + example1)             
 
 def secure_pid():
     print("Ensure the NGINX process ID (PID) file is secured")
