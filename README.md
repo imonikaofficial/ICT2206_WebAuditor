@@ -4,7 +4,7 @@
 WebAuditor is a suite of Audit tools to analyze the configurations of Apache Tomcat and NGINX web servers in Ubuntu 20.04 systems
 
 ## Prerequisites
-1. Ubuntu operating system
+1. Ubuntu 20.04 system (tools tested on this)
 2. beautifulsoup4
 3. colorama
 
