@@ -52,5 +52,5 @@ To verify that the environment variables have been set correctly, you can run th
 ## Steps to run the tool
 sudo -i
 python3 nginxtraktor.py https://example.com (your_web_server_url)
-
+```
 YouTube Demo Link:https://www.youtube.com/watch?v=lxaVUWANBI4
