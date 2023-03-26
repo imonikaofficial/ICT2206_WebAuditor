@@ -1644,7 +1644,7 @@ add_header X-Content-Type-Options "nosniff" always;
   if output3:
     # Check if the line is not commented out
     if not output3.startswith('#'):
-        if "'no-referrer'" in output3 or '"no-referrer"':
+        if "'no-referrer'" or '"no-referrer"' in output3:
            print(f"[+] Referrer Policy is enabled and configured properly.")
         else:
            print(f"{Fore.RED}[-] Referrer Policy is commented out and not enabled.")
